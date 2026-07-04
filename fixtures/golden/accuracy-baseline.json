@@ -1,0 +1,57 @@
+{
+  "sessions": 13,
+  "overallAccuracy": 0.923,
+  "unclassifiedRate": 0,
+  "perClass": {
+    "agent": {
+      "precision": 1,
+      "recall": 0.857,
+      "support": 7
+    },
+    "human": {
+      "precision": 0.75,
+      "recall": 1,
+      "support": 3
+    },
+    "crawler": {
+      "precision": 1,
+      "recall": 1,
+      "support": 3
+    },
+    "unclassified": {
+      "precision": 1,
+      "recall": 1,
+      "support": 0
+    }
+  },
+  "tier1": {
+    "precision": 1,
+    "cases": 9
+  },
+  "confusion": {
+    "agent": {
+      "agent": 6,
+      "human": 1,
+      "crawler": 0,
+      "unclassified": 0
+    },
+    "human": {
+      "agent": 0,
+      "human": 3,
+      "crawler": 0,
+      "unclassified": 0
+    },
+    "crawler": {
+      "agent": 0,
+      "human": 0,
+      "crawler": 3,
+      "unclassified": 0
+    },
+    "unclassified": {
+      "agent": 0,
+      "human": 0,
+      "crawler": 0,
+      "unclassified": 0
+    }
+  }
+}

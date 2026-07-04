@@ -40,3 +40,6 @@ jobs:
 
       - name: Validate fixtures corpus
         run: pnpm fixtures:validate
+
+      - name: Classifier accuracy gate
+        run: pnpm accuracy

@@ -23,3 +23,6 @@ test-results/
 
 # generated e2e report fixtures
 **/e2e/.generated/
+
+# tinybird cli credentials
+.tinyb

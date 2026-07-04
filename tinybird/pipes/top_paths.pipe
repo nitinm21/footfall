@@ -1,4 +1,4 @@
-NODE top_paths
+NODE result
 SQL >
     SELECT path, count() AS requests
     FROM events
@@ -6,3 +6,5 @@ SQL >
     GROUP BY path
     ORDER BY requests DESC, path ASC
     LIMIT 20
+
+TYPE endpoint

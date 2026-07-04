@@ -2,10 +2,10 @@
 # Correlated to events by request_id. Mirrors CorrectionSchema in core/src/ingest.ts.
 
 SCHEMA >
-    `request_id` String,
-    `status` Int16,
-    `path` Nullable(String),
-    `ts` Int64
+    `request_id` String `json:$.request_id`,
+    `status` Int16 `json:$.status`,
+    `path` Nullable(String) `json:$.path`,
+    `ts` Int64 `json:$.ts`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(fromUnixTimestamp64Milli(ts))"

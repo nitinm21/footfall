@@ -1,4 +1,4 @@
-NODE requests_by_day
+NODE result
 SQL >
     SELECT
         toDate(fromUnixTimestamp64Milli(ts)) AS day,
@@ -6,3 +6,5 @@ SQL >
     FROM events
     GROUP BY day
     ORDER BY day
+
+TYPE endpoint

@@ -1,26 +1,25 @@
 # Footfall raw request events — mirrors packages/core/src/schema.ts (Event).
-# Deploy with the Tinybird CLI: `tb push` (needs a workspace token). The ingest
-# endpoint (apps/web) forwards here via the Events API when TINYBIRD_TOKEN is set.
+# JSONPaths map the ingested JSON (Events API / ingest endpoint) to columns.
 
 SCHEMA >
-    `v` Int8,
-    `ts` Int64,
-    `site` String,
-    `method` LowCardinality(String),
-    `path` String,
-    `has_query` UInt8,
-    `status` Nullable(Int16),
-    `resp_bytes` Nullable(Int32),
-    `content_type` Nullable(String),
-    `duration_ms` Nullable(Int32),
-    `ua` Nullable(String),
-    `accept` Nullable(String),
-    `sec_fetch_mode` Nullable(String),
-    `referer_host` Nullable(String),
-    `conditional` UInt8,
-    `ip_hash` String,
-    `asset` UInt8,
-    `request_id` Nullable(String)
+    `v` Int8 `json:$.v`,
+    `ts` Int64 `json:$.ts`,
+    `site` String `json:$.site`,
+    `method` LowCardinality(String) `json:$.method`,
+    `path` String `json:$.path`,
+    `has_query` UInt8 `json:$.has_query`,
+    `status` Nullable(Int16) `json:$.status`,
+    `resp_bytes` Nullable(Int32) `json:$.resp_bytes`,
+    `content_type` Nullable(String) `json:$.content_type`,
+    `duration_ms` Nullable(Int32) `json:$.duration_ms`,
+    `ua` Nullable(String) `json:$.ua`,
+    `accept` Nullable(String) `json:$.accept`,
+    `sec_fetch_mode` Nullable(String) `json:$.sec_fetch_mode`,
+    `referer_host` Nullable(String) `json:$.referer_host`,
+    `conditional` UInt8 `json:$.conditional`,
+    `ip_hash` String `json:$.ip_hash`,
+    `asset` UInt8 `json:$.asset`,
+    `request_id` Nullable(String) `json:$.request_id`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(fromUnixTimestamp64Milli(ts))"

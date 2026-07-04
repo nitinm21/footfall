@@ -144,6 +144,8 @@ Both the log parsers and the middleware normalize into this shape; everything do
 
 Nullable fields power the **field-coverage matrix**: a report module whose required fields are null for the source greys out; it never breaks and never silently shows wrong numbers.
 
+> **Phase 4.5 adds `bot_verified` (`verified` \| `spoofed` \| null).** User-agent strings are spoofable — observed live: Cursor impersonates Googlebot — so self-declared crawler/agent claims are verified against operator IP ranges before being trusted.
+
 ### Data flow
 
 ```
@@ -236,7 +238,7 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 ### Tasks
 1. **Normalizers** (`core/normalize/`): Vercel log-drain JSON → Event[]; JSONL passthrough with validation. Each normalizer exports its **field map** (which Event fields it can populate) — this feeds the coverage matrix.
 2. **Classifier** (`core/classify/`):
-   - Tier 1 — UA-exact table: claude-code, Cursor, PerplexityBot, GPTBot, ClaudeBot, Googlebot, Bingbot, etc. → family + class, confidence `high`. Table is data (`ua-table.ts`), trivially extendable.
+   - Tier 1 — UA-exact table: claude-code, Cursor, PerplexityBot, GPTBot, ClaudeBot, Googlebot, Bingbot, etc. → family + class, confidence `high`. Table is data (`ua-table.ts`), trivially extendable. (UA claims for verifiable operators are IP-verified in **Phase 4.5** — strings can be spoofed; a `Googlebot` UA from a non-Google IP is a spoof, not a crawler.)
    - Tier 2 — browser detection: sec-fetch headers + asset-fetch behavior at session level → `human`.
    - Tier 3 — behavioral agent: no/unknown UA + session features (asset ratio ≈ 0, fetch cadence, markdown `Accept`, conditional-request behavior, path linearity) → `agent`, family `unidentified` (or `codex-suspect` where the signature matches), confidence `medium`.
    - Everything else → `unclassified`. **Never force-assign.**
@@ -326,6 +328,38 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 - [ ] Kill-switch env var actually stops emission on a deployed site
 
 **HARD STOP. Present load-test numbers and a screenshot-level summary of real events flowing; wait for approval.**
+
+---
+
+## Phase 4.5: Bot verification & UA-spoof detection
+
+**Goal:** stop trusting user-agent strings blindly. Verify self-declared crawlers/agents (Googlebot, GPTBot, Bingbot, ChatGPT-User, …) against their operators' published IP ranges / forward-confirmed reverse-DNS, so spoofed traffic is caught instead of counted.
+
+**Motivated by a live capture finding (July 2026):** driving real agents at a tunnelled instance of `apps/target`, Claude Code sent `Claude-User (claude-code/2.1.201)` (identifiable), Codex's native tool sent `ChatGPT-User` (identifiable) while its shell path used `curl` (anonymous), and **Cursor impersonated `Googlebot` on ~44% of its fetches** (16 of 36 requests across 5 runs; the rest `curl`/`axios`). UA strings are unreliable and sometimes adversarial; verification is the fix. Without it, spoofed Cursor traffic silently inflates the Googlebot/crawler bucket.
+
+**Estimated effort:** 1 weekend.
+**Depends on:** Phase 4 — the middleware/ingest path is where the raw client IP is available (before it is hashed) to perform verification.
+
+### Tasks
+1. **Operator table + verifier:** a pure data table (`packages/core/verify/`) of verifiable operators → published IP CIDRs and/or reverse-DNS suffixes (Googlebot → `*.googlebot.com` + Google ranges; Bingbot → `*.search.msn.com`; GPTBot / OAI-SearchBot / ClaudeBot → published ranges). A capture-time verifier maps `(claimed-operator, raw IP) → verified | spoofed | unverifiable` via forward-confirmed reverse-DNS and/or CIDR match. **DNS/network I/O lives at the capture boundary (middleware / normalizer), never in pure `core`.**
+2. **Event schema:** add `bot_verified: "verified" | "spoofed" | null` (null when the source can't verify — feeds the coverage matrix). Additive and nullable; handled per the schema-version policy.
+3. **Middleware (extends Phase 4):** when a request's UA claims a verifiable operator, verify against cached IP ranges / rDNS at the edge and stamp `bot_verified` **before the IP is hashed**. Fail-open: lookup timeout → `null`, never blocks or delays the response; ranges refreshed on a schedule.
+4. **Classifier spoof-guard (extends Phase 2):** a Tier-1 crawler/agent claim is honoured at `high` confidence only when `bot_verified !== "spoofed"`. `spoofed` → drop the claimed family and fall through to behavioural (Tier 3) as `agent` (family `spoofed-crawler`), flagged in receipts. `null` → keep the UA match but mark it "unverified" in the receipt.
+5. **Detect + aggregate:** a "spoofed bot traffic" signal — requests claiming a verifiable crawler that failed verification — surfaced in the report/dashboard ("N requests impersonated Googlebot").
+6. **Fixtures + accuracy:** verified / spoofed / unverifiable fixtures; the accuracy harness reports spoof-detection precision; receipts display the verification result.
+
+### Automated Verification
+- [ ] Verifier unit tests: representative `(operator, IP)` pairs → verified/spoofed/unverifiable (DNS/CIDR mocked)
+- [ ] Spoof-guard test: a `Googlebot` UA with `bot_verified: "spoofed"` classifies as `agent` / `spoofed-crawler`, not `crawler/googlebot`
+- [ ] Golden: report shows the spoofed-bot count; coverage matrix greys verification out when the source can't provide it
+- [ ] `pnpm -r test` + accuracy gate green; CI green
+
+### Manual Verification (Nitin)
+- [ ] Re-run the real Cursor capture: its spoofed-Googlebot fetches now show as spoofed/agent, not Googlebot
+- [ ] Real Googlebot from Google's published ranges still classifies as `crawler/googlebot`
+- [ ] The "impersonated Googlebot" number is honest and defensible
+
+**HARD STOP. Wait for approval.**
 
 ---
 
@@ -476,6 +510,7 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 ## Risks & mitigations
 
 - **Behavioral classification is genuinely hard.** Mitigation: precision-first tiers, honest `unclassified`, published accuracy, corpus grows with every misclassification found. Never block a phase on classifier perfection — block on *honesty*.
+- **User-agent strings are unreliable and sometimes adversarial.** Observed live (July 2026, real agents at a tunnelled rig): Cursor impersonates `Googlebot` on ~44% of fetches; Codex shells to `curl` (anonymous) though its native tool sends `ChatGPT-User`; only Claude Code self-identifies cleanly (`claude-code/…`). Left unaddressed, spoofed traffic silently inflates the crawler bucket. Mitigation: **Phase 4.5** verifies self-declared crawlers/agents against operator IP ranges / forward-confirmed reverse-DNS and flags spoofs; behavioral classification plus the honest `unidentified` bucket cover the anonymous rest. We name what's verifiable and never fabricate an identity.
 - **Vercel log access on free plans is limited.** Mitigation: corpus starts from local capture (P1); real own-site data arrives via the middleware (P4); the wedge accepts middleware-capture as an alternative to uploads. Capture is **forward-only** — no backfill exists on Hobby — so recruit pitches promise "install today, report in 7 days," and capture must be running *before* a fix ships for the fix-impact card to have a before-window.
 - **Next middleware cannot see response status/size.** Mitigation (P4): request-ID correlation (`x-footfall-id`) + server-side beacons — `not-found.tsx` for 404, `instrumentation.ts` `onRequestError` for 5xx (never `error.tsx`: client component, invisible to agents); rendered-page-implies-200 convention; outside-in shell probe replaces the byte heuristic on Vercel; coverage matrix greys out anything unavailable rather than guessing.
 - **Tinybird free-tier limits.** Mitigation: per-site caps at middleware AND ingest; sampling with visible drop counters; quality script watches quota headroom. If limits bite, sampling tightens — never a surprise bill.

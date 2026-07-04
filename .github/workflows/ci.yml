@@ -43,3 +43,27 @@ jobs:
 
       - name: Classifier accuracy gate
         run: pnpm accuracy
+
+  e2e:
+    name: report e2e (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm --filter @footfall/report exec playwright install --with-deps chromium
+
+      - name: Report e2e
+        run: pnpm --filter @footfall/report test:e2e

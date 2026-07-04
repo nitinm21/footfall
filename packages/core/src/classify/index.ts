@@ -27,6 +27,19 @@ function classify(session: Session, f: SessionFeatures): Classification {
   const ua = session.ua;
   const receipt = buildReceipt(session, f);
 
+  // Spoof guard (Phase 4.5): a UA claiming a verifiable crawler (Googlebot, GPTBot, …)
+  // from an IP outside its published ranges is an impersonator — never trust the claim.
+  if (f.botVerified === "spoofed") {
+    return {
+      class: "agent",
+      family: "spoofed-crawler",
+      confidence: "high",
+      tier: 1,
+      heuristic: false,
+      receipt,
+    };
+  }
+
   // Tier 1 — known agent/crawler declared in the UA.
   const known = lookupUa(ua);
   if (known) {

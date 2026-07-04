@@ -237,7 +237,11 @@ function deadEnds(result: AnalysisResult): string {
   const authCard = `<div class="failcard"><div class="t">Auth walls</div><div class="v num">${fmt(t.auth_wall)}</div><div class="d">401/403 responses to agent requests</div></div>`;
   const retryCard = `<div class="failcard"><div class="t">Retry loops</div><div class="v num">${fmt(t.retry_loop)}</div><div class="d">≥3 identical fetches within 60 s</div></div>`;
   const cards = `<div class="failcards">${emptyShellCard}${authCard}${retryCard}</div>`;
-  return mod("Where agents hit dead ends", `<div class="chart">${chart}</div>${cards}`);
+  const spoofNote =
+    result.spoofedRequests > 0
+      ? `<div class="callout">⚠ ${fmt(result.spoofedRequests)} request(s) impersonated a verifiable crawler (e.g. Googlebot) — caught by IP verification and reclassified as agents.</div>`
+      : "";
+  return mod("Where agents hit dead ends", `<div class="chart">${chart}</div>${cards}${spoofNote}`);
 }
 
 function recommendations(result: AnalysisResult): string {

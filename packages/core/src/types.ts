@@ -40,6 +40,8 @@ export interface SessionFeatures {
   notFound: number;
   authBlocked: number;
   serverErrors: number;
+  /** Session-level bot verification: "spoofed" if any event failed IP verification. */
+  botVerified: "verified" | "spoofed" | null;
 }
 
 /** One line of a classification receipt (`present` renders ✓, otherwise —). */
@@ -163,6 +165,8 @@ export interface AnalysisResult {
   meta: AnalysisMeta;
   trafficSplit: TrafficSplitRow[];
   agentSharePct: number;
+  /** Requests whose UA claimed a verifiable crawler but failed IP verification (spoofed). */
+  spoofedRequests: number;
   daily: DailyRow[];
   families: FamilyRow[];
   topPages: TopPageRow[];

@@ -20,6 +20,15 @@ export function buildReceipt(session: Session, f: SessionFeatures): Receipt {
     signals.push({ text: "no user-agent header sent", present: false });
   }
 
+  if (f.botVerified === "verified") {
+    signals.push({ text: "IP verified against the operator's published ranges", present: true });
+  } else if (f.botVerified === "spoofed") {
+    signals.push({
+      text: "claimed a verifiable crawler UA from an unlisted IP (spoofed)",
+      present: false,
+    });
+  }
+
   signals.push({
     text: `${f.assetRequests} asset fetches across ${f.requests} request${f.requests === 1 ? "" : "s"}`,
     present: true,

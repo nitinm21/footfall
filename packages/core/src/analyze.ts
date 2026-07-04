@@ -75,6 +75,9 @@ export function analyze(
     },
     trafficSplit: split,
     agentSharePct: agentSharePct(sessions),
+    spoofedRequests: sessions
+      .filter((s) => s.classification.family === "spoofed-crawler")
+      .reduce((n, s) => n + s.events.length, 0),
     daily: dailyRollup(sessions),
     families: familyBreakdown(sessions),
     topPages,

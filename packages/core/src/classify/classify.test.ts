@@ -86,6 +86,23 @@ describe("Tier 3 — behavioural agent", () => {
   });
 });
 
+describe("spoof guard (Phase 4.5)", () => {
+  it("reclassifies a Googlebot UA from an unlisted IP as spoofed-crawler", () => {
+    const c = classifyOne([
+      makeEvent({ ua: "Mozilla/5.0 (compatible; Googlebot/2.1)", bot_verified: "spoofed" }),
+    ]);
+    expect(c).toMatchObject({ class: "agent", family: "spoofed-crawler", tier: 1 });
+  });
+
+  it("keeps a verified Googlebot as a crawler", () => {
+    const c = classifyOne([
+      makeEvent({ ua: "Mozilla/5.0 (compatible; Googlebot/2.1)", bot_verified: "verified" }),
+    ]);
+    expect(c).toMatchObject({ class: "crawler", family: "googlebot" });
+    expect(c.receipt.signals.some((s) => s.text.includes("IP verified"))).toBe(true);
+  });
+});
+
 describe("never force-assign", () => {
   it("leaves an unknown non-tool client unclassified", () => {
     const c = classifyOne([makeEvent({ ua: "Wharrgarbl/9.0", path: "/" })]);

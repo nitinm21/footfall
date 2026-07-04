@@ -46,5 +46,10 @@ export function computeFeatures(session: Session): SessionFeatures {
     notFound: ev.filter((e) => e.status === 404 || e.status === 410).length,
     authBlocked: ev.filter((e) => e.status === 401 || e.status === 403).length,
     serverErrors: statusOf(500, 599),
+    botVerified: ev.some((e) => e.bot_verified === "spoofed")
+      ? "spoofed"
+      : ev.some((e) => e.bot_verified === "verified")
+        ? "verified"
+        : null,
   };
 }

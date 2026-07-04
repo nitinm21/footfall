@@ -17,7 +17,8 @@
     "test": "pnpm -r test",
     "capture": "tsx scripts/capture.ts",
     "fixtures:validate": "tsx scripts/fixtures-validate.ts",
-    "accuracy": "tsx scripts/accuracy.ts"
+    "accuracy": "tsx scripts/accuracy.ts",
+    "footfall": "tsx packages/cli/src/bin.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

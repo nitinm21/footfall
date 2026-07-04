@@ -1,5 +1,6 @@
-// Narrow subpath import: keep node:crypto (in core's barrel) out of the edge bundle.
+// Narrow subpath imports: keep node:crypto (in core's barrel) out of the edge bundle.
 import { EVENT_VERSION, type Event } from "@footfall/core/schema";
+import { botVerified } from "@footfall/core/verify";
 import { hashIp } from "./hash";
 
 const ASSET_EXT = /\.(css|js|mjs|map|svg|png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|eot)$/i;
@@ -34,6 +35,8 @@ export async function buildEvent(
   const url = new URL(req.url);
   const h = req.headers;
   const ip = firstForwardedIp(h);
+  // Verify against the raw IP BEFORE it is hashed away (pure CIDR check, no I/O).
+  const verified = botVerified(h.get("user-agent"), ip);
   return {
     v: EVENT_VERSION,
     ts: opts.nowMs,
@@ -52,5 +55,6 @@ export async function buildEvent(
     conditional: h.has("if-none-match") || h.has("if-modified-since"),
     ip_hash: await hashIp(ip, opts.ipSalt, opts.nowMs),
     asset: isAsset(url.pathname),
+    bot_verified: verified,
   };
 }

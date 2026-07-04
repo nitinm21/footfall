@@ -13,8 +13,8 @@
 //
 // This is a temporary vendored copy until @footfall/next is published to npm (Phase 8).
 
-import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 const EVENT_VERSION = 1;
 const TIMEOUT_MS = 500;

@@ -129,7 +129,8 @@ Both the log parsers and the middleware normalize into this shape; everything do
 | `site` | string | site token |
 | `method` | string | |
 | `path` | string | query string dropped; a `has_query` bool kept |
-| `status` | int | |
+| `has_query` | bool | whether the request carried a query string (string itself dropped) |
+| `status` | int \| null | **null when the source can't observe it** (Next middleware pre-render; assets/API routes without beacons) — nullable per the coverage-matrix design; resolved in Phase 0 |
 | `resp_bytes` | int \| null | null when the source can't provide it |
 | `content_type` | string \| null | |
 | `duration_ms` | int \| null | |
@@ -175,7 +176,7 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 
 ### Automated Verification
 - [ ] `pnpm install && pnpm -r typecheck` passes
-- [ ] `pnpm -r lint` passes
+- [ ] `pnpm lint` passes (single-pass root Biome `biome check .`; Biome is whole-repo, so lint is not `-r` per-package — Phase 0 deviation)
 - [ ] `pnpm -r test` passes (schema round-trip test green)
 - [ ] CI run on GitHub is green on `main`
 - [ ] `git ls-files` shows the full layout (packages/, apps/, fixtures/, scripts/, docs/, .github/)

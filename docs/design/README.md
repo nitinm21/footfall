@@ -12,11 +12,17 @@ the dashboard (Phase 5). It is a Claude artifact with two relevant versions:
 Artifact: https://claude.ai/code/artifact/629ba2bc-f73c-4f88-bfc3-8d5ed567b260
 (use the version picker to switch between the two versions).
 
-## ⚠️ Action required (Nitin)
+## Status
 
-These two HTML files are **not yet committed**. The verbatim artifact HTML can't be
-exported losslessly by the build agent's tools (the fetch path returns Markdown, not
-raw HTML, and can't target a specific artifact version). Please download **both**
-versions from the artifact's version picker and drop the two `.html` files into this
-directory. They aren't required by any Phase 0 automated gate, but they are the design
-contract Phases 3 and 5 build against, so they should land before Phase 3.
+- **`v2-dashboard-decluttered`** — ✅ landed. Exported losslessly from the artifact's
+  current version as `footfall-dashboards.v2-dashboard-decluttered.html` (standalone,
+  self-contained HTML — opens directly in a browser; the claude.ai iframe runtime is
+  stripped since it isn't part of the design).
+- **`v1-two-tab-spec`** — ⚠️ still needs manual export. The fetch path can only target
+  the artifact's *current* version, so the earlier v1 (with per-module data-contract
+  annotations) can't be pulled automatically. Please open the artifact, switch to
+  `v1-two-tab-spec` in the version picker, download it, and drop it here as
+  `footfall-dashboards.v1-two-tab-spec.html`.
+
+These files aren't required by any Phase 0 automated gate, but they are the design
+contract Phases 3 and 5 build against, so v1 should also land before Phase 3.

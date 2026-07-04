@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Footfall — dashboard</title>
+<style>
+  :root{
+    --paper:#f7f7f4; --card:#ffffff; --ink:#16181d; --muted:#676e79; --line:#e3e4de;
+    --accent:#2743d6; --accent-soft:#eceffb;
+    --human:#9aa1ab; --crawler:#d99a2b; --unknown:#c9cdd4;
+    --crit:#c73a2e; --crit-soft:#faeeec; --ok:#2e7d4f; --ok-soft:#eaf4ee; --warn:#b97f1f; --warn-soft:#f9f1e2;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0 20px 60px}
+  .wrap{max-width:1120px;margin:0 auto}
+  h1,h2,h3{text-wrap:balance;margin:0}
+  a{color:var(--accent)}
+  .mono{font-family:var(--mono)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------- page header ---------- */
+  .masthead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;padding:26px 0 16px}
+  .brand{font-size:21px;font-weight:700;letter-spacing:-.02em}
+  .brand .steps{color:var(--accent)}
+  .masthead .sub{color:var(--muted);font-size:13.5px}
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px;width:fit-content;margin:0 0 24px}
+  .tabs button{font:inherit;font-weight:600;font-size:14px;border:0;background:transparent;color:var(--muted);padding:8px 18px;border-radius:7px;cursor:pointer}
+  .tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .tabs button[aria-selected="true"]{background:var(--ink);color:#fff}
+  .tabs button .k{display:block;font-size:11.5px;font-weight:500;opacity:.75}
+
+  /* ---------- cards / modules ---------- */
+  section.mod{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px 22px;margin:0 0 20px}
+  .modhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:14px}
+  .modhead h2{font-size:16px;font-weight:700;letter-spacing:-.01em}
+  .chip{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;padding:3px 8px;border-radius:5px;white-space:nowrap}
+  .chip.heur{background:var(--warn-soft);color:var(--warn)}
+  .footnote{font-size:12.5px;color:var(--muted);margin-top:12px}
+
+  /* ---------- report masthead ---------- */
+  .report-head{background:var(--ink);color:#fff;border-radius:12px;padding:24px 28px;margin-bottom:20px}
+  .report-head .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#9fb0f5;text-transform:uppercase}
+  .report-head h2{font-size:23px;line-height:1.3;font-weight:700;margin:10px 0 4px;letter-spacing:-.015em;max-width:34em}
+  .report-head h2 em{font-style:normal;color:#aebcf8}
+  .report-head .meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;font-size:13px;color:#b9bfd0}
+  .report-head .meta span b{color:#fff;font-weight:600}
+
+  /* ---------- stat / KPI rows ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .kpi .lab{font-size:12.5px;color:var(--muted);font-weight:600}
+  .kpi .val{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+  .kpi .val small{font-size:15px;font-weight:600;color:var(--muted)}
+  .kpi .delta{font-size:12.5px;margin-top:3px;font-weight:600}
+  .delta.up{color:var(--ok)} .delta.down{color:var(--ok)} .delta.bad{color:var(--crit)} .delta.flat{color:var(--muted)}
+
+  /* ---------- charts ---------- */
+  .chart{overflow-x:auto}
+  .chart svg{display:block;min-width:640px;width:100%;height:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;color:#3d434c;margin:8px 2px 2px}
+  .legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+  .callout{background:var(--accent-soft);border-radius:8px;padding:9px 14px;font-size:13px;color:#2b3568;margin-top:14px}
+  .split2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .donut-row{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+  .donut-legend{font-size:13.5px;min-width:230px}
+  .donut-legend div{display:flex;align-items:baseline;gap:9px;padding:4px 0}
+  .donut-legend .sw{width:11px;height:11px;border-radius:3px;flex:none;align-self:center}
+  .donut-legend .l{flex:1}
+  .donut-legend .v{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+
+  /* ---------- tables ---------- */
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:8px 14px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:9px 14px 9px 0;border-bottom:1px solid #eef0ea;vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  td.path{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  td.n{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12.5px}
+  .sharebar{background:#eef0ea;border-radius:4px;height:8px;width:120px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+  .sharebar i{display:block;height:100%;background:var(--accent)}
+  .pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .pill.crit{background:var(--crit-soft);color:var(--crit)}
+  .pill.ok{background:var(--ok-soft);color:var(--ok)}
+  .pill.warn{background:var(--warn-soft);color:var(--warn)}
+  .pill.mut{background:#eef1ee;color:#5a635d}
+
+  /* ---------- failure stat cards ---------- */
+  .failcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .failcard{border:1px solid var(--line);border-left:3px solid var(--crit);border-radius:8px;padding:13px 15px}
+  .failcard.h{border-left-color:var(--warn)}
+  .failcard .t{font-size:13px;font-weight:700}
+  .failcard .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
+  .failcard .d{font-size:12.5px;color:var(--muted)}
+
+  /* ---------- recommendations ---------- */
+  ol.recs{margin:0;padding:0;list-style:none;counter-reset:rec}
+  ol.recs li{counter-increment:rec;display:flex;gap:14px;padding:11px 0;border-bottom:1px solid #eef0ea;align-items:baseline}
+  ol.recs li:last-child{border-bottom:0}
+  ol.recs li::before{content:counter(rec);font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent);background:var(--accent-soft);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex:none;align-self:center}
+  .rec-t{font-weight:600;font-size:14px}
+  .rec-d{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+  pre.code{background:#16181d;color:#d6dae2;border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:1.6;overflow-x:auto;margin:14px 0 0}
+  pre.code .c{color:#7d879a}
+
+  /* ---------- receipts ---------- */
+  .receipt{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-top:12px}
+  .receipt:first-of-type{margin-top:0}
+  .receipt .head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13.5px;font-weight:600}
+  .receipt ul{margin:8px 0 0;padding:0;list-style:none;font-size:13px;color:#3d434c}
+  .receipt li{padding:3px 0 3px 22px;position:relative}
+  .receipt li::before{content:"✓";position:absolute;left:2px;color:var(--ok);font-weight:700}
+  .receipt li.miss::before{content:"—";color:var(--muted)}
+  .receipt .sig{font-family:var(--mono);font-size:12px}
+
+  /* ---------- fix impact ---------- */
+  .beforeafter{display:flex;gap:36px;flex-wrap:wrap}
+  .ba{min-width:150px}
+  .ba .lab{font-size:12px;color:var(--muted);font-weight:600}
+  .ba .val{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+  .ba .val.good{color:var(--ok)}
+  .ba .bar{height:10px;border-radius:4px;background:var(--crit);margin-top:6px}
+  .ba .bar.zero{background:var(--ok);width:4px !important}
+
+  /* ---------- coverage table ---------- */
+  td.field{font-family:var(--mono);font-size:12.5px;font-weight:600;white-space:nowrap}
+
+  /* ---------- toolbar (live) ---------- */
+  .toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin-bottom:20px;font-size:13.5px}
+  .toolbar .site{font-weight:700;font-size:14.5px}
+  .toolbar .sel{border:1px solid var(--line);border-radius:7px;padding:5px 12px;color:#3d434c;background:#fbfbf9}
+  .live-dot{display:inline-flex;align-items:center;gap:7px;color:var(--ok);font-weight:600}
+  .live-dot i{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}
+  .toolbar .right{margin-left:auto;color:var(--muted);font-family:var(--mono);font-size:11.5px}
+
+  footer{color:var(--muted);font-size:12.5px;margin-top:30px;border-top:1px solid var(--line);padding-top:14px}
+
+  @media (max-width:880px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .split2{grid-template-columns:1fr}
+    .failcards{grid-template-columns:1fr}
+    .toolbar .right{margin-left:0;flex-basis:100%}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .tabs button{transition:background .15s,color .15s}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="masthead">
+    <div class="brand"><span class="steps">👣</span> Footfall</div>
+    <div class="sub">sample data · modelkit.dev (fictional)</div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" id="tab-report" onclick="showTab('report')">Log Report<span class="k">from uploaded logs</span></button>
+    <button role="tab" aria-selected="false" id="tab-live" onclick="showTab('live')">Live Dashboard<span class="k">always on</span></button>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- TAB 1 · LOG REPORT                                               -->
+  <!-- ================================================================ -->
+  <div id="view-report">
+
+    <div class="report-head">
+      <div class="eyebrow">Agent traffic report</div>
+      <h2>31% of modelkit.dev’s traffic is AI agents — and <em>16,908 of their requests dead-ended.</em></h2>
+      <div class="meta">
+        <span><b>412,384</b> requests</span>
+        <span><b>Jun 1 – 14, 2026</b></span>
+        <span><b>Cloudflare Logpush</b> export</span>
+        <span><b>94%</b> classified</span>
+      </div>
+    </div>
+
+    <section class="mod">
+      <div class="modhead"><h2>Who is visiting</h2></div>
+      <div class="donut-row" style="margin:4px 0 22px">
+        <div id="donut-split"></div>
+        <div class="donut-legend" id="donut-split-legend"></div>
+      </div>
+      <div class="chart" id="chart-daily"></div>
+      <div class="legend" id="chart-daily-legend"></div>
+      <div class="callout">Human traffic drops ~45% on weekends. Agent traffic doesn’t.</div>
+    </section>
+
+    <section class="mod">
+      <div class="modhead"><h2>Agent families</h2></div>
+      <div class="chart" id="chart-families"></div>
+      <div class="footnote">⚠ Codex sends no user-agent header — its share is a behavioral estimate.</div>
+    </section>
+
+    <section class="mod">
+      <div class="modhead"><h2>Top pages by agent demand</h2></div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Path</th><th>Agent requests</th><th>Human requests</th><th>Agent share</th></tr></thead>
+          <tbody id="tbl-toppages"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mod">
+      <div class="modhead"><h2>Where agents hit dead ends</h2></div>
+      <div class="chart" id="chart-404"></div>
+      <div class="failcards">
+        <div class="failcard h">
+          <div class="t">Empty-shell pages <span class="chip heur">HEURISTIC</span></div>
+          <div class="v num">4,318</div>
+          <div class="d">HTML shells with no content — <span class="mono">/playground</span>, <span class="mono">/examples/live</span></div>
+        </div>
+        <div class="failcard">
+          <div class="t">Auth walls</div>
+          <div class="v num">1,204</div>
+          <div class="d">401/403 responses, mostly <span class="mono">/api/keys</span></div>
+        </div>
+        <div class="failcard">
+          <div class="t">Retry loops</div>
+          <div class="v num">1,842</div>
+          <div class="d">≥3 identical fetches within 60 s</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mod">
+      <div class="modhead"><h2>Recommended fixes</h2></div>
+      <ol class="recs">
+        <li><span class="rec-t">Publish <span class="mono">/llms.txt</span> and <span class="mono">/llms-full.txt</span></span><span class="rec-d" style="margin-left:auto">8,074 dead-ends</span></li>
+        <li><span class="rec-t">Serve markdown mirrors for top agent pages</span><span class="rec-d" style="margin-left:auto">3,890 requests to /docs/api/chat.md</span></li>
+        <li><span class="rec-t">Publish <span class="mono">/openapi.json</span></span><span class="rec-d" style="margin-left:auto">2,730 requests</span></li>
+        <li><span class="rec-t">301 <span class="mono">/docs/v1/*</span> → <span class="mono">/docs/*</span></span><span class="rec-d" style="margin-left:auto">2,214 dead-ends</span></li>
+        <li><span class="rec-t">Static-render <span class="mono">/playground</span> <span class="chip heur">HEURISTIC</span></span><span class="rec-d" style="margin-left:auto">4,318 empty-shell fetches</span></li>
+      </ol>
+      <pre class="code"><span class="c"># /llms.txt — draft generated from observed agent demand</span>
+# ModelKit
+> TypeScript SDK for building LLM applications.
+
+## Docs
+- [Chat API](https://modelkit.dev/docs/api/chat.md)
+- [Quickstart](https://modelkit.dev/docs/quickstart.md)
+- [Embeddings API](https://modelkit.dev/docs/api/embeddings.md)
+- [Error reference](https://modelkit.dev/docs/errors.md)
+- [Changelog](https://modelkit.dev/changelog.md)</pre>
+    </section>
+
+    <section class="mod">
+      <div class="modhead"><h2>Missing from this log export</h2></div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Signal</th><th>Status</th><th>Unlocks</th></tr></thead>
+          <tbody>
+            <tr><td class="field">timestamp, path, status</td><td><span class="pill ok">present</span></td><td>traffic, 404s, retries</td></tr>
+            <tr><td class="field">user-agent</td><td><span class="pill ok">present</span></td><td>family classification</td></tr>
+            <tr><td class="field">response bytes</td><td><span class="pill ok">present</span></td><td>empty-shell detection</td></tr>
+            <tr><td class="field">accept header</td><td><span class="pill crit">missing</span></td><td>stronger classification</td></tr>
+            <tr><td class="field">conditional headers</td><td><span class="pill crit">missing</span></td><td>agent vs crawler</td></tr>
+            <tr><td class="field">response timing</td><td><span class="pill crit">missing</span></td><td>retry-cause analysis</td></tr>
+            <tr><td class="field">real-time delivery</td><td><span class="pill crit">missing</span></td><td>alerts, fix verification</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout"><b>Install the snippet</b> to capture all seven signals — one middleware file, observe-only, fails open.</div>
+    </section>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- TAB 2 · LIVE DASHBOARD                                           -->
+  <!-- ================================================================ -->
+  <div id="view-live" hidden>
+
+    <div class="toolbar">
+      <span class="site">modelkit.dev</span>
+      <span class="sel">Last 30 days ▾</span>
+      <span class="live-dot"><i></i> live</span>
+      <span class="right">middleware v0.3 · last event 12 s ago</span>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="lab">Agent requests · 30d</div><div class="val num">284,912</div><div class="delta up">▲ 18% vs prior 30d</div></div>
+      <div class="kpi"><div class="lab">Agent share of all traffic</div><div class="val num">33.4<small>%</small></div><div class="delta up">▲ 2.1 pts</div></div>
+      <div class="kpi"><div class="lab">Agent sessions</div><div class="val num">41,206</div><div class="delta up">▲ 15%</div></div>
+      <div class="kpi"><div class="lab">Failed agent requests</div><div class="val num">19,340</div><div class="delta down">▼ 22% since llms.txt shipped</div></div>
+    </div>
+
+    <section class="mod">
+      <div class="modhead"><h2>Traffic by visitor class</h2></div>
+      <div class="chart" id="chart-30d"></div>
+      <div class="legend" id="chart-30d-legend"></div>
+    </section>
+
+    <div class="split2">
+      <section class="mod" style="margin-bottom:20px">
+        <div class="modhead"><h2>Agent families · 30d</h2></div>
+        <div class="chart" id="chart-families-live"></div>
+        <div class="footnote">⚠ Codex share is a behavioral estimate.</div>
+      </section>
+
+      <section class="mod" style="margin-bottom:20px">
+        <div class="modhead"><h2>Classification receipts</h2></div>
+        <div class="receipt">
+          <div class="head"><span>Session <span class="mono">#48112</span> → Claude Code</span><span class="pill ok">high confidence</span></div>
+          <ul>
+            <li class="sig">user-agent: claude-code/2.x present</li>
+            <li class="sig">0 asset fetches across 22 page requests</li>
+            <li class="sig">accept: text/markdown on 18/22 requests</li>
+            <li class="sig">median gap 2.1 s · burst concurrency 4</li>
+            <li class="sig">sends if-none-match on repeat fetches</li>
+          </ul>
+        </div>
+        <div class="receipt">
+          <div class="head"><span>Session <span class="mono">#48377</span> → Unidentified agent</span><span class="pill warn">medium confidence</span></div>
+          <ul>
+            <li class="sig miss">no user-agent header sent</li>
+            <li class="sig">0 asset fetches across 41 requests / 3m 10s</li>
+            <li class="sig">linear crawl of /docs/* in sitemap order</li>
+            <li class="sig miss">no conditional requests — refetches full pages</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <section class="mod">
+      <div class="modhead"><h2>Failure feed</h2></div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Path</th><th>Failure</th><th>Agent hits · 7d</th><th>Trend</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="path">/docs/api/chat.md</td><td><span class="pill crit">404</span></td><td class="n">1,120</td><td class="n">▲ 4%</td><td><span class="pill mut">open</span></td></tr>
+            <tr><td class="path">/playground</td><td><span class="pill warn">empty shell</span></td><td class="n">980</td><td class="n">→</td><td><span class="pill mut">open</span></td></tr>
+            <tr><td class="path">/openapi.json</td><td><span class="pill crit">404</span></td><td class="n">640</td><td class="n">▲ 31%</td><td><span class="pill mut">open</span></td></tr>
+            <tr><td class="path">/api/keys</td><td><span class="pill warn">401 auth</span></td><td class="n">310</td><td class="n">→</td><td><span class="pill mut">open</span></td></tr>
+            <tr><td class="path">/docs/v1/streaming</td><td><span class="pill crit">404</span></td><td class="n">12</td><td class="n">▼ 97%</td><td><span class="pill ok">fix live · 301 Jun 24</span></td></tr>
+            <tr><td class="path">/llms.txt</td><td><span class="pill crit">404</span></td><td class="n">0</td><td class="n">▼ 100%</td><td><span class="pill ok">fix live · Jun 12</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mod">
+      <div class="modhead"><h2>Fix impact — <span class="mono">/llms.txt</span> shipped Jun 12</h2></div>
+      <div class="beforeafter">
+        <div class="ba"><div class="lab">404s · 14d before</div><div class="val num">6,214</div><div class="bar" style="width:150px"></div></div>
+        <div class="ba"><div class="lab">404s · 14d after</div><div class="val good num">0</div><div class="bar zero"></div></div>
+        <div class="ba"><div class="lab">Successful fetches since</div><div class="val num">11,480</div></div>
+        <div class="ba"><div class="lab">Claude Code sessions touching it</div><div class="val num">62%</div></div>
+      </div>
+    </section>
+
+    <section class="mod">
+      <div class="modhead"><h2>Recent agent sessions</h2></div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Time</th><th>Family</th><th>Requests</th><th>Journey</th><th>Flags</th></tr></thead>
+          <tbody>
+            <tr><td class="n">14:32</td><td>Claude Code <span class="pill ok">high</span></td><td class="n">22 / 74s</td><td class="path">/docs/quickstart → /docs/api/chat → /docs/errors</td><td><span class="pill ok">clean</span></td></tr>
+            <tr><td class="n">14:29</td><td>Unidentified <span class="pill warn">med</span></td><td class="n">41 / 3m10s</td><td class="path">/changelog → /docs/api/* (crawl)</td><td><span class="pill crit">3× 404 /openapi.json</span></td></tr>
+            <tr><td class="n">14:21</td><td>Cursor <span class="pill ok">high</span></td><td class="n">9 / 28s</td><td class="path">/docs/api/embeddings</td><td><span class="pill ok">clean</span></td></tr>
+            <tr><td class="n">14:18</td><td>Codex <span class="pill warn">med · behavioral</span></td><td class="n">17 / 66s</td><td class="path">/docs/quickstart → /playground</td><td><span class="pill warn">empty shell</span></td></tr>
+            <tr><td class="n">14:11</td><td>Claude Code <span class="pill ok">high</span></td><td class="n">5 / 12s</td><td class="path">/llms.txt → /docs/api/chat.md</td><td><span class="pill crit">404 on .md</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer>Footfall · sample data · modelkit.dev is fictional</footer>
+</div>
+
+<script>
+/* ---------- helpers ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, attrs){ const t = sv('text', Object.assign({x, y, fill:'#676e79', 'font-size':'11', 'font-family':'ui-monospace,Menlo,monospace'}, attrs||{}), parent); t.textContent = s; return t; }
+const fmt = n => n.toLocaleString('en-US');
+const fmtK = n => n >= 1000 ? (n/1000) + 'k' : '' + n;
+
+/* ---------- line chart ---------- */
+function lineChart(mountId, legendId, cfg){
+  const W = 760, H = 300, L = 56, R = 30, T = 14, B = 46;
+  const pw = W-L-R, ph = H-T-B;
+  const svg = sv('svg', {viewBox:`0 0 ${W} ${H}`, role:'img', 'aria-label':cfg.aria||''}, document.getElementById(mountId));
+  const n = cfg.labels.length;
+  const x = i => L + pw * (n === 1 ? 0.5 : i/(n-1));
+  const y = v => T + ph * (1 - v/cfg.yMax);
+  // weekend bands
+  (cfg.bands||[]).forEach(i => {
+    const x0 = Math.max(L, x(i-0.5)), x1 = Math.min(L+pw, x(i+0.5));
+    sv('rect', {x:x0, y:T, width:x1-x0, height:ph, fill:'#eef0ea'}, svg);
+  });
+  // gridlines + y ticks
+  const step = cfg.yMax / cfg.yTicks;
+  for (let t = 0; t <= cfg.yTicks; t++){
+    const v = step*t, yy = y(v);
+    sv('line', {x1:L, y1:yy, x2:L+pw, y2:yy, stroke:'#e7e8e2', 'stroke-width':1}, svg);
+    txt(svg, L-8, yy+4, fmtK(v), {'text-anchor':'end'});
+  }
+  // x ticks — always label the last point; drop the regular tick just before it to avoid collision
+  cfg.labels.forEach((lab, i) => {
+    const isLast = i === n-1;
+    if (!isLast && (i % cfg.tickEvery !== 0 || n-1-i < cfg.tickEvery)) return;
+    txt(svg, x(i), T+ph+16, lab, {'text-anchor':'middle'});
+  });
+  // axis labels
+  txt(svg, L+pw/2, H-6, cfg.xLab, {'text-anchor':'middle','font-size':'11.5','fill':'#4c5560','font-family':'inherit'});
+  const yl = txt(svg, 14, T+ph/2, cfg.yLab, {'text-anchor':'middle','font-size':'11.5','fill':'#4c5560','font-family':'inherit'});
+  yl.setAttribute('transform', `rotate(-90 14 ${T+ph/2})`);
+  // series
+  cfg.series.forEach(s => {
+    const pts = s.values.map((v,i) => `${x(i)},${y(v)}`).join(' ');
+    sv('polyline', {points:pts, fill:'none', stroke:s.color, 'stroke-width':2.4, 'stroke-linejoin':'round', 'stroke-linecap':'round', 'stroke-dasharray': s.dash||'none'}, svg);
+    if (n <= 16) s.values.forEach((v,i) => sv('circle', {cx:x(i), cy:y(v), r:2.6, fill:s.color}, svg));
+    // endpoint emphasis
+    const last = s.values[n-1];
+    sv('circle', {cx:x(n-1), cy:y(last), r:3.6, fill:s.color}, svg);
+    if (s.endLabel) txt(svg, x(n-1)-4, y(last)-9, fmtK(Math.round(last/100)*100), {'text-anchor':'end', fill:s.color, 'font-weight':'700'});
+  });
+  // legend
+  const lg = document.getElementById(legendId);
+  cfg.series.forEach(s => {
+    const d = document.createElement('span');
+    d.innerHTML = `<span class="sw" style="background:${s.color}"></span>${s.name}`;
+    lg.appendChild(d);
+  });
+  if (cfg.bands && cfg.bands.length){
+    const d = document.createElement('span');
+    d.innerHTML = `<span class="sw" style="background:#eef0ea;border:1px solid #dcded6"></span>weekend`;
+    lg.appendChild(d);
+  }
+}
+
+/* ---------- horizontal bar chart ---------- */
+function hbar(mountId, cfg){
+  const W = cfg.W || 760, rowH = 34, labW = cfg.labW || 210, valW = cfg.valW || 76, T = 6, B = 42;
+  const n = cfg.items.length, H = T + n*rowH + B;
+  const pw = W - labW - valW - 16;
+  const svg = sv('svg', {viewBox:`0 0 ${W} ${H}`, role:'img', 'aria-label':cfg.aria||''}, document.getElementById(mountId));
+  if (cfg.W && cfg.W < 640) svg.style.minWidth = cfg.W + 'px';
+  const max = cfg.xMax;
+  const xv = v => labW + pw * (v/max);
+  // vertical gridlines + ticks
+  for (let t = 0; t <= cfg.xTicks; t++){
+    const v = max/cfg.xTicks*t, xx = xv(v);
+    sv('line', {x1:xx, y1:T, x2:xx, y2:T+n*rowH, stroke:'#e7e8e2'}, svg);
+    txt(svg, xx, T+n*rowH+16, fmtK(v), {'text-anchor':'middle'});
+  }
+  txt(svg, labW+pw/2, H-6, cfg.xLab, {'text-anchor':'middle','font-size':'11.5','fill':'#4c5560','font-family':'inherit'});
+  cfg.items.forEach((it, i) => {
+    const yy = T + i*rowH + rowH/2;
+    txt(svg, labW-10, yy+4, it.label, {'text-anchor':'end','font-size':'12','fill':'#16181d'});
+    sv('rect', {x:labW, y:yy-9, width:Math.max(2, pw*(it.value/max)), height:18, rx:3, fill:it.color}, svg);
+    txt(svg, xv(it.value)+7, yy+4, fmt(it.value) + (it.note ? ' ' + it.note : ''), {'font-size':'11.5','fill':'#3d434c'});
+  });
+}
+
+/* ---------- donut ---------- */
+function donut(mountId, legendId, cfg){
+  const size = 190, cx = size/2, cy = size/2, r1 = 86, r2 = 55;
+  const svg = sv('svg', {viewBox:`0 0 ${size} ${size}`, style:'width:190px;min-width:190px', role:'img', 'aria-label':cfg.aria||''}, document.getElementById(mountId));
+  const total = cfg.items.reduce((a,b) => a+b.value, 0);
+  let a0 = -Math.PI/2;
+  cfg.items.forEach(it => {
+    const a1 = a0 + 2*Math.PI*(it.value/total);
+    const big = (a1-a0) > Math.PI ? 1 : 0;
+    const p = `M ${cx+r1*Math.cos(a0)} ${cy+r1*Math.sin(a0)}
+               A ${r1} ${r1} 0 ${big} 1 ${cx+r1*Math.cos(a1)} ${cy+r1*Math.sin(a1)}
+               L ${cx+r2*Math.cos(a1)} ${cy+r2*Math.sin(a1)}
+               A ${r2} ${r2} 0 ${big} 0 ${cx+r2*Math.cos(a0)} ${cy+r2*Math.sin(a0)} Z`;
+    sv('path', {d:p, fill:it.color, stroke:'#fff', 'stroke-width':1.5}, svg);
+    a0 = a1;
+  });
+  txt(svg, cx, cy-4, cfg.centerTop, {'text-anchor':'middle','font-size':'22','font-weight':'700','fill':'#16181d','font-family':'inherit'});
+  txt(svg, cx, cy+15, cfg.centerBottom, {'text-anchor':'middle','font-size':'10.5'});
+  const lg = document.getElementById(legendId);
+  cfg.items.forEach(it => {
+    const row = document.createElement('div');
+    row.innerHTML = `<span class="sw" style="background:${it.color}"></span><span class="l">${it.name}</span><span class="v num">${fmt(it.value)} · ${(100*it.value/total).toFixed(1)}%</span>`;
+    lg.appendChild(row);
+  });
+}
+
+/* ================= data ================= */
+const C = {agent:'#2743d6', human:'#9aa1ab', crawler:'#d99a2b', unknown:'#c9cdd4',
+           cc:'#d97757', cursor:'#16181d', codex:'#10a37f', pplx:'#20808d', other:'#7c6fd0', unid:'#b9bec6'};
+
+/* --- report: donut --- */
+donut('donut-split', 'donut-split-legend', {
+  aria:'Traffic split by visitor class',
+  centerTop:'31%', centerBottom:'AI agents',
+  items:[
+    {name:'Humans', value:189697, color:C.human},
+    {name:'AI agents', value:127839, color:C.agent},
+    {name:'Crawlers / bots', value:70105, color:C.crawler},
+    {name:'Unclassified', value:24743, color:C.unknown},
+  ]});
+
+/* --- report: 14-day daily lines --- */
+lineChart('chart-daily', 'chart-daily-legend', {
+  aria:'Requests per day by visitor class, June 1 to 14',
+  labels:['Jun 1','Jun 2','Jun 3','Jun 4','Jun 5','Jun 6','Jun 7','Jun 8','Jun 9','Jun 10','Jun 11','Jun 12','Jun 13','Jun 14'],
+  yMax:20000, yTicks:4, tickEvery:2, bands:[5,6,12,13],
+  xLab:'Date (June 2026)', yLab:'Requests per day',
+  series:[
+    {name:'Humans', color:C.human, values:[15100,15700,16000,15500,14800,9300,8800,15800,16200,15900,15300,14500,9000,8400]},
+    {name:'AI agents', color:C.agent, endLabel:true, values:[8600,8800,8900,9100,9000,8900,9200,9100,9300,9200,9400,9300,9500,9600]},
+    {name:'Crawlers', color:C.crawler, dash:'4 4', values:[4800,5100,4900,5000,5200,5100,4900,5000,5100,4900,5000,5200,4900,5000]},
+  ]});
+
+/* --- report: families --- */
+hbar('chart-families', {
+  aria:'Agent requests by family over 14 days',
+  xLab:'Agent requests (Jun 1–14)', xMax:60000, xTicks:4,
+  items:[
+    {label:'Claude Code', value:51420, color:C.cc},
+    {label:'Cursor', value:33895, color:C.cursor},
+    {label:'Codex ⚠ behavioral', value:19340, color:C.codex},
+    {label:'Perplexity / fetchers', value:8780, color:C.pplx},
+    {label:'Other known agents', value:6120, color:C.other},
+    {label:'Unidentified agent', value:8284, color:C.unid},
+  ]});
+
+/* --- report: 404 paths --- */
+hbar('chart-404', {
+  aria:'Agent requests that returned 404, by path',
+  xLab:'Agent requests answered 404 (Jun 1–14)', xMax:7000, xTicks:7,
+  items:[
+    {label:'/llms.txt', value:6214, color:'#c73a2e'},
+    {label:'/docs/api/chat.md', value:3890, color:'#c73a2e'},
+    {label:'/openapi.json', value:2730, color:'#c73a2e'},
+    {label:'/docs/v1/streaming', value:2214, color:'#c73a2e'},
+    {label:'/llms-full.txt', value:1860, color:'#c73a2e'},
+  ]});
+
+/* --- report: top pages table --- */
+const topPages = [
+  ['/docs/api/chat', 18240, 9120],
+  ['/docs/quickstart', 14860, 21340],
+  ['/docs/api/embeddings', 11970, 4410],
+  ['/changelog', 9420, 3180],
+  ['/docs/errors', 8660, 2905],
+];
+document.getElementById('tbl-toppages').innerHTML = topPages.map(([p,a,h]) => {
+  const share = 100*a/(a+h);
+  return `<tr><td class="path">${p}</td><td class="n">${fmt(a)}</td><td class="n">${fmt(h)}</td>
+    <td><span class="sharebar"><i style="width:${share.toFixed(0)}%"></i></span><span class="n">${share.toFixed(1)}%</span></td></tr>`;
+}).join('');
+
+/* --- live: 30-day lines (deterministic sample series) --- */
+(function(){
+  const labels = [], humans = [], agents = [], crawlers = [], bands = [];
+  for (let i = 0; i < 30; i++){
+    labels.push(i < 28 ? 'Jun ' + (3+i) : 'Jul ' + (i-27));
+    const wknd = (i % 7 === 3 || i % 7 === 4);           // Jun 3 is a Wednesday
+    if (wknd) bands.push(i);
+    humans.push(Math.round((wknd ? 9000 + Math.sin(i*1.7)*400 : 15000 + Math.sin(i*1.7)*600)/10)*10);
+    agents.push(Math.round((8900 + i*68 + Math.sin(i*2.3)*260)/10)*10);
+    crawlers.push(Math.round((4900 + Math.sin(i*1.1)*300)/10)*10);
+  }
+  lineChart('chart-30d', 'chart-30d-legend', {
+    aria:'Requests per day by visitor class, last 30 days',
+    labels, yMax:20000, yTicks:4, tickEvery:5, bands,
+    xLab:'Date (Jun 3 – Jul 2, 2026)', yLab:'Requests per day',
+    series:[
+      {name:'Humans', color:C.human, values:humans},
+      {name:'AI agents', color:C.agent, endLabel:true, values:agents},
+      {name:'Crawlers', color:C.crawler, dash:'4 4', values:crawlers},
+    ]});
+})();
+
+/* --- live: families --- */
+hbar('chart-families-live', {
+  aria:'Agent requests by family over 30 days',
+  W:500, labW:168, valW:64,
+  xLab:'Agent requests (last 30 days)', xMax:120000, xTicks:4,
+  items:[
+    {label:'Claude Code', value:118400, color:C.cc},
+    {label:'Cursor', value:74050, color:C.cursor},
+    {label:'Codex ⚠ behavioral', value:41900, color:C.codex},
+    {label:'Perplexity / fetchers', value:19800, color:C.pplx},
+    {label:'Other known agents', value:12480, color:C.other},
+    {label:'Unidentified agent', value:18282, color:C.unid},
+  ]});
+
+/* ---------- tabs ---------- */
+function showTab(which){
+  document.getElementById('view-report').hidden = which !== 'report';
+  document.getElementById('view-live').hidden = which !== 'live';
+  document.getElementById('tab-report').setAttribute('aria-selected', which === 'report');
+  document.getElementById('tab-live').setAttribute('aria-selected', which === 'live');
+}
+</script>
+
+</body>
+</html>

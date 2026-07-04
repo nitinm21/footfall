@@ -210,11 +210,17 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 6. Document capture-rerun instructions so the corpus can grow every time a new agent tool ships.
 
 ### Automated Verification
-- [ ] `pnpm fixtures:validate` passes (schema-valid, sidecars present, ≥5 labels, ≥3 sessions each)
+- [ ] `pnpm fixtures:validate` passes (schema-valid, sidecars present, ≥4 labels, ≥3 sessions each)
+      **Phase-1 deviation (flagged, approved):** ≥4 not ≥5. Locally, coding agents shell out to
+      curl to reach `localhost` (curl UA), so per-family UA fingerprints can't be captured. The
+      4 local *behavioural* families — claude-code, cursor, crawler, human-browser — are captured.
+      `codex`'s defining trait is sending **no UA**, which only appears when it fetches a public
+      site with its native client → deferred to Phase 4 (deployed middleware). (Codex also could
+      not be driven locally: its shell-exec of network requests hangs even sandbox-disabled.)
 - [ ] `pnpm -r test` still green
 
 ### Manual Verification (Nitin)
-- [ ] Spot-check traces match intuition: agent runs fetch ~0 assets, human run fetches many; Codex traces genuinely lack UA
+- [ ] Spot-check traces match intuition: agent runs fetch ~0 assets, human run fetches many (Codex's genuine no-UA signature arrives in Phase 4, per the deviation above)
 - [ ] The tasks given to each agent were realistic (doc-reading tasks, not synthetic ping loops)
 - [ ] Comfortable that no sensitive data is in any committed fixture
 

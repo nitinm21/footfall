@@ -1,0 +1,8 @@
+NODE requests_by_day
+SQL >
+    SELECT
+        toDate(fromUnixTimestamp64Milli(ts)) AS day,
+        count() AS requests
+    FROM events
+    GROUP BY day
+    ORDER BY day

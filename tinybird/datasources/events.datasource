@@ -1,0 +1,27 @@
+# Footfall raw request events — mirrors packages/core/src/schema.ts (Event).
+# Deploy with the Tinybird CLI: `tb push` (needs a workspace token). The ingest
+# endpoint (apps/web) forwards here via the Events API when TINYBIRD_TOKEN is set.
+
+SCHEMA >
+    `v` Int8,
+    `ts` Int64,
+    `site` String,
+    `method` LowCardinality(String),
+    `path` String,
+    `has_query` UInt8,
+    `status` Nullable(Int16),
+    `resp_bytes` Nullable(Int32),
+    `content_type` Nullable(String),
+    `duration_ms` Nullable(Int32),
+    `ua` Nullable(String),
+    `accept` Nullable(String),
+    `sec_fetch_mode` Nullable(String),
+    `referer_host` Nullable(String),
+    `conditional` UInt8,
+    `ip_hash` String,
+    `asset` UInt8,
+    `request_id` Nullable(String)
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(fromUnixTimestamp64Milli(ts))"
+ENGINE_SORTING_KEY "site, ts"

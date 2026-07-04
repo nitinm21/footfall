@@ -1,0 +1,8 @@
+NODE top_paths
+SQL >
+    SELECT path, count() AS requests
+    FROM events
+    WHERE asset = 0
+    GROUP BY path
+    ORDER BY requests DESC, path ASC
+    LIMIT 20

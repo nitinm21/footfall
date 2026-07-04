@@ -1,0 +1,12 @@
+# Status corrections from server-side beacons (5xx via instrumentation onRequestError).
+# Correlated to events by request_id. Mirrors CorrectionSchema in core/src/ingest.ts.
+
+SCHEMA >
+    `request_id` String,
+    `status` Int16,
+    `path` Nullable(String),
+    `ts` Int64
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(fromUnixTimestamp64Milli(ts))"
+ENGINE_SORTING_KEY "request_id, ts"

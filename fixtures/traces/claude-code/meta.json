@@ -1,0 +1,9 @@
+{
+  "label": "claude-code",
+  "tool": "Claude Code CLI",
+  "version": "2.1.201",
+  "task": "Read the Acme SDK docs at the local proxy; per run: (01) summarize the SDK + install, (02) find auth + first request with code, (03) locate llms.txt / API reference and try the playground.",
+  "date": "2026-07-04",
+  "mechanism": "Driven headlessly via `claude -p <task> --dangerously-skip-permissions --allowedTools Bash`. Claude Code fetched pages with curl (its server-side WebFetch cannot reach localhost), so the recorded UA is curl/8.1.1 while the request behaviour (goal-directed page selection, ~0 assets, dead-end probing) is Claude Code's.",
+  "notes": "3 sessions with intentionally different tasks. run-03 shows the agent hunting for a machine-readable index and 404ing on /llms.txt, /docs/api, /openapi.json, etc. — the core demand/dead-end signal the product exists to surface."
+}

@@ -1,0 +1,9 @@
+{
+  "label": "human-browser",
+  "tool": "Playwright Chromium (headless shell)",
+  "version": "chromium 149.0.7827.55 / @playwright/test 1.61.1",
+  "task": "Load the homepage and doc pages like a person, following a stale link to a 404.",
+  "date": "2026-07-04",
+  "mechanism": "scripts/browse.ts drives a real Chromium engine through the proxy; it fetches CSS/JS/image assets and sends browser headers (UA 'HeadlessChrome/149…', sec-fetch-mode navigate/no-cors).",
+  "notes": "~58% asset ratio — the inverse of the agents and crawler. A real browser engine, not hand-driven; hand-driven human sessions can be added later with the same proxy. Reproduce with `scripts/capture-session.sh <out> ./node_modules/.bin/tsx scripts/browse.ts http://localhost:4000`."
+}

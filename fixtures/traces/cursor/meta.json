@@ -1,0 +1,9 @@
+{
+  "label": "cursor",
+  "tool": "Cursor Agent CLI (cursor-agent)",
+  "version": "2026.07.01-41b2de7",
+  "task": "Same three doc-reading tasks as claude-code: (01) summarize + install, (02) auth + first request, (03) find llms.txt / API reference and try the playground.",
+  "date": "2026-07-04",
+  "mechanism": "Driven headlessly via `cursor-agent -p <task> -f`. Cursor fetched pages with curl (recorded UA curl/8.7.1). Behaviour is Cursor's: goal-directed, and in run-03 it fetched the interactive page's JS/CSS chunks trying to read the client-rendered content.",
+  "notes": "3 sessions. run-03 probed /api, /openapi.json, /docs/reference (404s) and pulled the interactive page's static chunks — distinct behaviour from the other agents."
+}

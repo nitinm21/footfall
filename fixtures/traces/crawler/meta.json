@@ -1,0 +1,9 @@
+{
+  "label": "crawler",
+  "tool": "naive crawler (scripts/crawl.ts)",
+  "version": "node fetch; UA AcmeDocsBot/1.0",
+  "task": "Breadth-first GET of every known URL once, including probe paths that don't exist (/llms.txt, /llms-full.txt, /openapi.json, /sitemap.xml, /robots.txt, *.md).",
+  "date": "2026-07-04",
+  "mechanism": "scripts/capture.ts proxy + a client sending UA 'AcmeDocsBot/1.0 (+https://acme.example/bot)'. No JavaScript, no assets.",
+  "notes": "Enumerates everything (12 URLs/run); 0% asset ratio; a bot UA. Produces dead-end (404) and demand-signal traffic. Reproduce with `scripts/capture-session.sh <out> ./node_modules/.bin/tsx scripts/crawl.ts http://localhost:4000`."
+}

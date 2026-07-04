@@ -20,3 +20,6 @@ test-results/
 
 # os
 .DS_Store
+
+# generated e2e report fixtures
+**/e2e/.generated/

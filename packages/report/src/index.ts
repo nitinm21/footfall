@@ -1,5 +1,5 @@
-// @footfall/report — Phase 3.
-// Input: AnalysisResult from @footfall/core. Output: a self-contained static HTML
-// report (inline SVG charts) matching the approved Log Report mock. Modules grey
-// out per the coverage matrix; classifier accuracy is printed in the footer.
-export {};
+// @footfall/report — AnalysisResult → self-contained static HTML report (the wedge).
+
+export * from "./charts";
+export { type AccuracySummary, type ReportOptions, renderReport } from "./report";
+export { el, esc, fmt, fmtK } from "./svg";

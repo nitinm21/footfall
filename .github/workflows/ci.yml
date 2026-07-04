@@ -37,3 +37,6 @@ jobs:
 
       - name: Test
         run: pnpm -r test
+
+      - name: Validate fixtures corpus
+        run: pnpm fixtures:validate

@@ -5,6 +5,9 @@ Repo-level scripts, added as their phase arrives:
 | Script | Phase | Purpose |
 |---|---|---|
 | `capture.ts` | 1 | Recording reverse proxy in front of `apps/target` → labelled JSONL. |
+| `capture-session.sh` | 1 | Orchestrates one session: proxy up → run a client → proxy down. |
+| `crawl.ts` | 1 | Naive-crawler client (breadth-first GET, bot UA, no assets). |
+| `browse.ts` | 1 | Real-Chromium client (fetches assets, browser headers). |
 | `fixtures-validate.ts` | 1 | Every JSONL row schema-valid; sidecars present; taxonomy documented. |
 | `accuracy.ts` | 2 | Run the classifier over `fixtures/traces`; print precision/recall + unclassified rate. |
 | `parity.ts` | 4 | Assert core aggregations (TS) ≡ Tinybird pipes (SQL) on a fixture window. |

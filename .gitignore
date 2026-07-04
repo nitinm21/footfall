@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# test / tooling artifacts
+coverage/
+playwright-report/
+test-results/
+.turbo/
+
+# env — never commit real secrets (.env.example is the committed template)
+.env
+.env.local
+.env*.local
+
+# os
+.DS_Store

@@ -19,7 +19,8 @@ SCHEMA >
     `conditional` UInt8 `json:$.conditional`,
     `ip_hash` String `json:$.ip_hash`,
     `asset` UInt8 `json:$.asset`,
-    `request_id` Nullable(String) `json:$.request_id`
+    `request_id` Nullable(String) `json:$.request_id`,
+    `bot_verified` Nullable(String) `json:$.bot_verified`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(fromUnixTimestamp64Milli(ts))"

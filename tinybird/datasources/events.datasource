@@ -24,3 +24,5 @@ SCHEMA >
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(fromUnixTimestamp64Milli(ts))"
 ENGINE_SORTING_KEY "site, ts"
+
+TOKEN "footfall_ingest" APPEND

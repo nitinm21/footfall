@@ -1,0 +1,124 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderReport > produces byte-stable HTML for the corpus (golden) 1`] = `
+"<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Footfall — target-local (Acme SDK) agent traffic report</title>
+<style>
+  :root{
+    --paper:#f7f7f4; --card:#ffffff; --ink:#16181d; --muted:#676e79; --line:#e3e4de;
+    --accent:#2743d6; --accent-soft:#eceffb;
+    --human:#9aa1ab; --crawler:#d99a2b; --unknown:#c9cdd4;
+    --crit:#c73a2e; --crit-soft:#faeeec; --ok:#2e7d4f; --ok-soft:#eaf4ee; --warn:#b97f1f; --warn-soft:#f9f1e2;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0 20px 60px}
+  .wrap{max-width:1120px;margin:0 auto}
+  h1,h2,h3{text-wrap:balance;margin:0}
+  a{color:var(--accent)}
+  .mono{font-family:var(--mono)}
+  .num{font-variant-numeric:tabular-nums}
+
+  .masthead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;padding:26px 0 16px}
+  .brand{font-size:21px;font-weight:700;letter-spacing:-.02em}
+  .brand .steps{color:var(--accent)}
+  .masthead .sub{color:var(--muted);font-size:13.5px}
+
+  section.mod{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px 22px;margin:0 0 20px}
+  .modhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:14px}
+  .modhead h2{font-size:16px;font-weight:700;letter-spacing:-.01em}
+  .chip{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;padding:3px 8px;border-radius:5px;white-space:nowrap}
+  .chip.heur{background:var(--warn-soft);color:var(--warn)}
+  .footnote{font-size:12.5px;color:var(--muted);margin-top:12px}
+
+  .report-head{background:var(--ink);color:#fff;border-radius:12px;padding:24px 28px;margin-bottom:20px}
+  .report-head .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#9fb0f5;text-transform:uppercase}
+  .report-head h2{font-size:23px;line-height:1.3;font-weight:700;margin:10px 0 4px;letter-spacing:-.015em;max-width:34em}
+  .report-head h2 em{font-style:normal;color:#aebcf8}
+  .report-head .meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;font-size:13px;color:#b9bfd0}
+  .report-head .meta span b{color:#fff;font-weight:600}
+
+  .chart{overflow-x:auto}
+  .chart svg{display:block;min-width:640px;width:100%;height:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;color:#3d434c;margin:8px 2px 2px}
+  .legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+  .callout{background:var(--accent-soft);border-radius:8px;padding:9px 14px;font-size:13px;color:#2b3568;margin-top:14px}
+  .donut-row{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+  .donut-legend{font-size:13.5px;min-width:230px}
+  .donut-legend div{display:flex;align-items:baseline;gap:9px;padding:4px 0}
+  .donut-legend .sw{width:11px;height:11px;border-radius:3px;flex:none;align-self:center}
+  .donut-legend .l{flex:1}
+  .donut-legend .v{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:8px 14px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:9px 14px 9px 0;border-bottom:1px solid #eef0ea;vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  td.path{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  td.n{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12.5px}
+  .sharebar{background:#eef0ea;border-radius:4px;height:8px;width:120px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+  .sharebar i{display:block;height:100%;background:var(--accent)}
+  .pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .pill.crit{background:var(--crit-soft);color:var(--crit)}
+  .pill.ok{background:var(--ok-soft);color:var(--ok)}
+  .pill.warn{background:var(--warn-soft);color:var(--warn)}
+  .pill.mut{background:#eef1ee;color:#5a635d}
+
+  .failcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .failcard{border:1px solid var(--line);border-left:3px solid var(--crit);border-radius:8px;padding:13px 15px}
+  .failcard.h{border-left-color:var(--warn)}
+  .failcard .t{font-size:13px;font-weight:700}
+  .failcard .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
+  .failcard .d{font-size:12.5px;color:var(--muted)}
+
+  ol.recs{margin:0;padding:0;list-style:none;counter-reset:rec}
+  ol.recs li{counter-increment:rec;display:flex;gap:14px;padding:11px 0;border-bottom:1px solid #eef0ea;align-items:baseline}
+  ol.recs li:last-child{border-bottom:0}
+  ol.recs li::before{content:counter(rec);font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent);background:var(--accent-soft);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex:none;align-self:center}
+  .rec-t{font-weight:600;font-size:14px}
+  .rec-d{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+  pre.code{background:#16181d;color:#d6dae2;border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:1.6;overflow-x:auto;margin:14px 0 0;white-space:pre-wrap}
+  pre.code .c{color:#7d879a}
+
+  td.field{font-family:var(--mono);font-size:12.5px;font-weight:600;white-space:nowrap}
+
+  .greyed{position:relative;opacity:.55;filter:grayscale(1)}
+  .greyed-note{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:10px}
+
+  footer{color:var(--muted);font-size:12.5px;margin-top:30px;border-top:1px solid var(--line);padding-top:14px}
+  footer .acc{font-family:var(--mono)}
+
+  @media (max-width:880px){
+    .failcards{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="masthead"><div class="brand"><span class="steps">👣</span> Footfall</div><div class="sub">target-local (Acme SDK) · jsonl export</div></div>
+<div class="report-head"><div class="eyebrow">Agent traffic report</div><h2>42.9% of target-local (Acme SDK)'s traffic is AI agents — and <em>25 of their requests dead-ended.</em></h2><div class="meta"><span><b>140</b> requests</span><span><b>Jul 4, 2026</b></span><span><b>jsonl</b> export</span><span><b>100%</b> classified</span></div></div>
+<section class="mod"><div class="modhead"><h2>Who is visiting</h2></div><div class="donut-row" style="margin:4px 0 22px"><div><svg viewBox="0 0 190 190" style="width:190px;min-width:190px" role="img" aria-label="Traffic split by visitor class"><path d="M 95 9 A 86 86 0 0 1 174.08 128.8 L 145.57 116.62 A 55 55 0 0 0 95 40 Z" fill="#9aa1ab" stroke="#fff" stroke-width="1.5"></path><path d="M 174.08 128.8 A 86 86 0 0 1 9.09 98.86 L 40.06 97.47 A 55 55 0 0 0 145.57 116.62 Z" fill="#2743d6" stroke="#fff" stroke-width="1.5"></path><path d="M 9.09 98.86 A 86 86 0 0 1 95 9 L 95 40 A 55 55 0 0 0 40.06 97.47 Z" fill="#d99a2b" stroke="#fff" stroke-width="1.5"></path><text x="95" y="91" fill="#16181d" font-size="22" font-family="inherit" text-anchor="middle" font-weight="700">42.9%</text><text x="95" y="110" fill="#676e79" font-size="10.5" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">AI agents</text></svg></div><div class="donut-legend"><div><span class="sw" style="background:#9aa1ab"></span><span class="l">Humans</span><span class="v num">44 · 31.4%</span></div><div><span class="sw" style="background:#2743d6"></span><span class="l">AI agents</span><span class="v num">60 · 42.9%</span></div><div><span class="sw" style="background:#d99a2b"></span><span class="l">Crawlers / bots</span><span class="v num">36 · 25.7%</span></div></div></div><div class="chart"><svg viewBox="0 0 760 300" role="img" aria-label="Requests per day by visitor class"><line x1="56" y1="254" x2="730" y2="254" stroke="#e7e8e2" stroke-width="1"></line><text x="48" y="258" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="end">0</text><line x1="56" y1="194" x2="730" y2="194" stroke="#e7e8e2" stroke-width="1"></line><text x="48" y="198" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="end">15</text><line x1="56" y1="134" x2="730" y2="134" stroke="#e7e8e2" stroke-width="1"></line><text x="48" y="138" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="end">30</text><line x1="56" y1="74" x2="730" y2="74" stroke="#e7e8e2" stroke-width="1"></line><text x="48" y="78" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="end">45</text><line x1="56" y1="14" x2="730" y2="14" stroke="#e7e8e2" stroke-width="1"></line><text x="48" y="18" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="end">60</text><text x="393" y="270" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">Jul 4</text><text x="393" y="294" fill="#4c5560" font-size="11.5" font-family="inherit" text-anchor="middle">Date</text><text x="14" y="134" fill="#4c5560" font-size="11.5" font-family="inherit" text-anchor="middle" transform="rotate(-90 14 134)">Requests per day</text><polyline points="393,78" fill="none" stroke="#9aa1ab" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="none"></polyline><circle cx="393" cy="78" r="2.6" fill="#9aa1ab"></circle><circle cx="393" cy="78" r="3.6" fill="#9aa1ab"></circle><polyline points="393,14" fill="none" stroke="#2743d6" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="none"></polyline><circle cx="393" cy="14" r="2.6" fill="#2743d6"></circle><circle cx="393" cy="14" r="3.6" fill="#2743d6"></circle><text x="389" y="5" fill="#2743d6" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="end" font-weight="700">60</text><polyline points="393,110" fill="none" stroke="#d99a2b" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4 4"></polyline><circle cx="393" cy="110" r="2.6" fill="#d99a2b"></circle><circle cx="393" cy="110" r="3.6" fill="#d99a2b"></circle></svg></div><div class="legend"><span><span class="sw" style="background:#9aa1ab"></span>Humans</span><span><span class="sw" style="background:#2743d6"></span>AI agents</span><span><span class="sw" style="background:#d99a2b"></span>Crawlers</span></div></section>
+<section class="mod"><div class="modhead"><h2>Agent families</h2></div><div class="chart"><svg viewBox="0 0 760 82" role="img" aria-label="Agent requests by family"><line x1="210" y1="6" x2="210" y2="40" stroke="#e7e8e2"></line><text x="210" y="56" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">0</text><line x1="324.5" y1="6" x2="324.5" y2="40" stroke="#e7e8e2"></line><text x="324.5" y="56" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">15</text><line x1="439" y1="6" x2="439" y2="40" stroke="#e7e8e2"></line><text x="439" y="56" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">30</text><line x1="553.5" y1="6" x2="553.5" y2="40" stroke="#e7e8e2"></line><text x="553.5" y="56" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">45</text><line x1="668" y1="6" x2="668" y2="40" stroke="#e7e8e2"></line><text x="668" y="56" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">60</text><text x="439" y="76" fill="#4c5560" font-size="11.5" font-family="inherit" text-anchor="middle">Agent requests</text><text x="200" y="27" fill="#16181d" font-size="12" font-family="ui-monospace,Menlo,monospace" text-anchor="end">Unidentified agent</text><rect x="210" y="14" width="458" height="18" rx="3" fill="#b9bec6"></rect><text x="675" y="27" fill="#3d434c" font-size="11.5" font-family="ui-monospace,Menlo,monospace">60</text></svg></div></section>
+<section class="mod"><div class="modhead"><h2>Top pages by agent demand</h2></div><div class="scroll"><table><thead><tr><th>Path</th><th>Agent requests</th><th>Human requests</th><th>Agent share</th></tr></thead><tbody><tr><td class="path">/docs/intro</td><td class="n">10</td><td class="n">3</td><td><span class="sharebar"><i style="width:77%"></i></span><span class="n">76.9%</span></td></tr><tr><td class="path">/</td><td class="n">8</td><td class="n">3</td><td><span class="sharebar"><i style="width:73%"></i></span><span class="n">72.7%</span></td></tr><tr><td class="path">/docs/guide</td><td class="n">7</td><td class="n">3</td><td><span class="sharebar"><i style="width:70%"></i></span><span class="n">70.0%</span></td></tr><tr><td class="path">/docs/interactive</td><td class="n">3</td><td class="n">4</td><td><span class="sharebar"><i style="width:43%"></i></span><span class="n">42.9%</span></td></tr></tbody></table></div></section>
+<section class="mod"><div class="modhead"><h2>Where agents hit dead ends</h2></div><div class="chart"><svg viewBox="0 0 760 252" role="img" aria-label="Agent requests that returned 404, by path"><line x1="210" y1="6" x2="210" y2="210" stroke="#e7e8e2"></line><text x="210" y="226" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">0</text><line x1="324.5" y1="6" x2="324.5" y2="210" stroke="#e7e8e2"></line><text x="324.5" y="226" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">0.75</text><line x1="439" y1="6" x2="439" y2="210" stroke="#e7e8e2"></line><text x="439" y="226" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">1.5</text><line x1="553.5" y1="6" x2="553.5" y2="210" stroke="#e7e8e2"></line><text x="553.5" y="226" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">2.25</text><line x1="668" y1="6" x2="668" y2="210" stroke="#e7e8e2"></line><text x="668" y="226" fill="#676e79" font-size="11" font-family="ui-monospace,Menlo,monospace" text-anchor="middle">3</text><text x="439" y="246" fill="#4c5560" font-size="11.5" font-family="inherit" text-anchor="middle">Agent requests answered 404/410</text><text x="200" y="27" fill="#16181d" font-size="12" font-family="ui-monospace,Menlo,monospace" text-anchor="end">/llms.txt</text><rect x="210" y="14" width="458" height="18" rx="3" fill="#c73a2e"></rect><text x="675" y="27" fill="#3d434c" font-size="11.5" font-family="ui-monospace,Menlo,monospace">3</text><text x="200" y="61" fill="#16181d" font-size="12" font-family="ui-monospace,Menlo,monospace" text-anchor="end">/openapi.json</text><rect x="210" y="48" width="458" height="18" rx="3" fill="#c73a2e"></rect><text x="675" y="61" fill="#3d434c" font-size="11.5" font-family="ui-monospace,Menlo,monospace">3</text><text x="200" y="95" fill="#16181d" font-size="12" font-family="ui-monospace,Menlo,monospace" text-anchor="end">/api</text><rect x="210" y="82" width="458" height="18" rx="3" fill="#c73a2e"></rect><text x="675" y="95" fill="#3d434c" font-size="11.5" font-family="ui-monospace,Menlo,monospace">3</text><text x="200" y="129" fill="#16181d" font-size="12" font-family="ui-monospace,Menlo,monospace" text-anchor="end">/docs/api</text><rect x="210" y="116" width="458" height="18" rx="3" fill="#c73a2e"></rect><text x="675" y="129" fill="#3d434c" font-size="11.5" font-family="ui-monospace,Menlo,monospace">3</text><text x="200" y="163" fill="#16181d" font-size="12" font-family="ui-monospace,Menlo,monospace" text-anchor="end">/docs/reference</text><rect x="210" y="150" width="458" height="18" rx="3" fill="#c73a2e"></rect><text x="675" y="163" fill="#3d434c" font-size="11.5" font-family="ui-monospace,Menlo,monospace">3</text><text x="200" y="197" fill="#16181d" font-size="12" font-family="ui-monospace,Menlo,monospace" text-anchor="end">/llms-full.txt</text><rect x="210" y="184" width="305.33" height="18" rx="3" fill="#c73a2e"></rect><text x="522.33" y="197" fill="#3d434c" font-size="11.5" font-family="ui-monospace,Menlo,monospace">2</text></svg></div><div class="failcards"><div class="failcard h"><div class="t">Empty-shell pages <span class="chip heur">HEURISTIC</span></div><div class="v num">0</div><div class="d">HTML shells with almost no content, fetched by agents</div></div><div class="failcard"><div class="t">Auth walls</div><div class="v num">5</div><div class="d">401/403 responses to agent requests</div></div><div class="failcard"><div class="t">Retry loops</div><div class="v num">25</div><div class="d">≥3 identical fetches within 60 s</div></div></div></section>
+<section class="mod"><div class="modhead"><h2>Recommended fixes</h2></div><ol class="recs"><li><span class="rec-t">Add 301 redirects for moved pages</span><span class="rec-d" style="margin-left:auto">12 agent dead-ends on /api, /docs/api, /docs/reference</span></li><li><span class="rec-t">Document or open agent access to /docs/private</span><span class="rec-d" style="margin-left:auto">5 agent requests hit an auth wall</span></li><li><span class="rec-t">Publish /llms.txt and /llms-full.txt</span><span class="rec-d" style="margin-left:auto">5 agent dead-ends on /llms.txt, /llms-full.txt</span></li><li><span class="rec-t">Publish /openapi.json</span><span class="rec-d" style="margin-left:auto">4 agent requests</span></li></ol><pre class="code"><span class="c"># /llms.txt — draft generated from observed agent demand</span>
+# target-local
+&gt; Project documentation.
+
+## Docs
+- [Intro](https://target-local/docs/intro)
+- [Home](https://target-local/)
+- [Guide](https://target-local/docs/guide)
+- [Interactive](https://target-local/docs/interactive)</pre></section>
+<section class="mod"><div class="modhead"><h2>Coverage — what this source provides</h2></div><div class="scroll"><table><thead><tr><th>Signal</th><th>Status</th><th>Unlocks</th></tr></thead><tbody><tr><td class="field">timestamp, path, status</td><td><span class="pill ok">present</span></td><td>traffic, 404s, retries</td></tr><tr><td class="field">user-agent</td><td><span class="pill ok">present</span></td><td>family classification</td></tr><tr><td class="field">response bytes</td><td><span class="pill ok">present</span></td><td>empty-shell detection</td></tr><tr><td class="field">accept header</td><td><span class="pill ok">present</span></td><td>stronger classification</td></tr><tr><td class="field">conditional headers</td><td><span class="pill ok">present</span></td><td>agent vs crawler</td></tr><tr><td class="field">response timing</td><td><span class="pill ok">present</span></td><td>retry-cause analysis</td></tr><tr><td class="field">real-time delivery</td><td><span class="pill crit">missing</span></td><td>alerts, fix verification</td></tr></tbody></table></div><div class="callout"><b>Install the snippet</b> to capture every signal in real time — one middleware file, observe-only, fails open.</div></section>
+<footer><div class="acc">Classifier accuracy (labeled corpus): overall 92.3% · Tier-1 UA precision 100.0% · 0.0% unclassified (never force-assigned).</div><div>Footfall — agent-experience analytics. Behavioral classification is imperfect; heuristic signals are flagged and unclassified traffic is never guessed.</div><div>Independent open-source project; not affiliated with any hosting provider or agent vendor.</div></footer>
+</div>
+</body>
+</html>
+"
+`;

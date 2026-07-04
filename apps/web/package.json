@@ -2,15 +2,27 @@
   "name": "@footfall/web",
   "version": "0.0.0",
   "private": true,
-  "description": "Dashboard + /api/ingest + onboarding + docs (Next.js). Placeholder until Phase 4/5.",
+  "description": "Dashboard + /api/ingest + onboarding + docs (Next.js).",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test"
   },
+  "dependencies": {
+    "@footfall/core": "workspace:*",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
   "devDependencies": {
     "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

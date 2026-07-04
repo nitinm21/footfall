@@ -5,6 +5,7 @@ export * from "./analyze";
 export * from "./classify";
 export * from "./detect";
 export * from "./hash";
+export * from "./ingest";
 export * from "./normalize";
 export * from "./recommend";
 export * from "./schema";

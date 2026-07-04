@@ -54,6 +54,12 @@ export const EventSchema = z.object({
   ip_hash: z.string().min(1),
   /** Whether this is a static asset (css/js/img/font) — kept, not dropped: asset ratio is a top classifier feature. */
   asset: z.boolean(),
+  /**
+   * Correlation id stamped by the live middleware (`x-footfall-id`) so a later
+   * server-side status beacon can correct the (unknown-at-middleware-time) status.
+   * Optional: only the live source populates it; log sources omit it.
+   */
+  request_id: z.string().optional(),
 });
 
 /** A single normalized request event — the unit every pipeline stage operates on. */

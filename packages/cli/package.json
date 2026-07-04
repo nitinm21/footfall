@@ -1,0 +1,20 @@
+{
+  "name": "@footfall/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "npx footfall init / check — one-command install and post-deploy verification (publishes as `footfall`).",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

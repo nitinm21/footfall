@@ -1,0 +1,15 @@
+{
+  "name": "@footfall/target",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Instrumented demo docs site with known failure modes — the test rig. Placeholder until Phase 1.",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

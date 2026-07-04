@@ -1,0 +1,17 @@
+{
+  "name": "@footfall/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Dashboard + /api/ingest + onboarding + docs (Next.js). Placeholder until Phase 4/5.",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

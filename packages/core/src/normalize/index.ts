@@ -1,6 +1,11 @@
-// normalize/ — Phase 2.
-// Source-specific parsers that turn raw input into Event[]:
-//   vercel-drain.ts (Vercel log-drain JSON), jsonl.ts (validated passthrough).
-// Each normalizer also exports its field map (which Event fields it can populate),
+// normalize/ — source-specific parsers that turn raw input into Event[].
+// Each normalizer exports its field map (which Event fields it can populate),
 // which feeds the coverage matrix.
-export {};
+
+export { ALL_FIELDS, type EventField, type FieldMap, hasField } from "./field-map";
+export { jsonlFieldMap, type NormalizeResult, normalizeJsonl } from "./jsonl";
+export {
+  normalizeVercelDrain,
+  type VercelDrainOptions,
+  vercelDrainFieldMap,
+} from "./vercel-drain";

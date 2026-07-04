@@ -11,3 +11,4 @@ export * from "./recommend";
 export * from "./schema";
 export * from "./sessionize";
 export * from "./types";
+export * from "./verify";

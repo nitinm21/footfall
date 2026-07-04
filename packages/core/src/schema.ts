@@ -60,6 +60,12 @@ export const EventSchema = z.object({
    * Optional: only the live source populates it; log sources omit it.
    */
   request_id: z.string().optional(),
+  /**
+   * Bot-identity verification: the self-declared operator (Googlebot, GPTBot, …)
+   * checked against its published IP ranges. "spoofed" means the UA claimed a
+   * verifiable crawler from an IP outside its ranges. null = unverifiable/not checked.
+   */
+  bot_verified: z.enum(["verified", "spoofed"]).nullable().optional(),
 });
 
 /** A single normalized request event — the unit every pipeline stage operates on. */

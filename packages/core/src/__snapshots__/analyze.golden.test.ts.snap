@@ -1,0 +1,223 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`analyze() golden over the committed corpus > produces a stable analysis result 1`] = `
+{
+  "agentSharePct": 42.9,
+  "classifiedPct": 100,
+  "coverage": [
+    {
+      "field": "timestamp, path, status",
+      "present": true,
+      "unlocks": "traffic, 404s, retries",
+    },
+    {
+      "field": "user-agent",
+      "present": true,
+      "unlocks": "family classification",
+    },
+    {
+      "field": "response bytes",
+      "present": true,
+      "unlocks": "empty-shell detection",
+    },
+    {
+      "field": "accept header",
+      "present": true,
+      "unlocks": "stronger classification",
+    },
+    {
+      "field": "conditional headers",
+      "present": true,
+      "unlocks": "agent vs crawler",
+    },
+    {
+      "field": "response timing",
+      "present": true,
+      "unlocks": "retry-cause analysis",
+    },
+    {
+      "field": "real-time delivery",
+      "present": false,
+      "unlocks": "alerts, fix verification",
+    },
+  ],
+  "demand": [
+    {
+      "agentHits": 3,
+      "count": 6,
+      "kind": "llms_txt",
+      "path": "/llms.txt",
+    },
+    {
+      "agentHits": 3,
+      "count": 6,
+      "kind": "openapi",
+      "path": "/openapi.json",
+    },
+    {
+      "agentHits": 3,
+      "count": 3,
+      "kind": "moved_path",
+      "path": "/api",
+    },
+    {
+      "agentHits": 3,
+      "count": 3,
+      "kind": "moved_path",
+      "path": "/docs/api",
+    },
+    {
+      "agentHits": 3,
+      "count": 3,
+      "kind": "moved_path",
+      "path": "/docs/reference",
+    },
+    {
+      "agentHits": 2,
+      "count": 5,
+      "kind": "llms_txt",
+      "path": "/llms-full.txt",
+    },
+    {
+      "agentHits": 2,
+      "count": 5,
+      "kind": "other",
+      "path": "/robots.txt",
+    },
+    {
+      "agentHits": 2,
+      "count": 5,
+      "kind": "other",
+      "path": "/sitemap.xml",
+    },
+    {
+      "agentHits": 2,
+      "count": 2,
+      "kind": "moved_path",
+      "path": "/docs/api-reference",
+    },
+    {
+      "agentHits": 1,
+      "count": 7,
+      "kind": "moved_path",
+      "path": "/docs/old-intro",
+    },
+    {
+      "agentHits": 1,
+      "count": 1,
+      "kind": "openapi",
+      "path": "/docs/openapi.json",
+    },
+    {
+      "agentHits": 0,
+      "count": 3,
+      "kind": "markdown_mirror",
+      "path": "/docs/guide.md",
+    },
+    {
+      "agentHits": 0,
+      "count": 1,
+      "kind": "other",
+      "path": "/favicon.ico",
+    },
+  ],
+  "failureTotals": {
+    "auth_wall": 5,
+    "dead_end": 25,
+    "empty_shell": 0,
+    "empty_shell_available": true,
+    "retry_loop": 25,
+  },
+  "families": [
+    {
+      "class": "agent",
+      "family": "unidentified",
+      "heuristic": false,
+      "requests": 60,
+      "sessions": 2,
+    },
+  ],
+  "recommendations": [
+    {
+      "heuristic": false,
+      "metric": 12,
+      "title": "Add 301 redirects for moved pages",
+    },
+    {
+      "heuristic": false,
+      "metric": 5,
+      "title": "Document or open agent access to /docs/private",
+    },
+    {
+      "heuristic": false,
+      "metric": 5,
+      "title": "Publish /llms.txt and /llms-full.txt",
+    },
+    {
+      "heuristic": false,
+      "metric": 4,
+      "title": "Publish /openapi.json",
+    },
+  ],
+  "sessionClassCounts": {
+    "agent": 2,
+    "crawler": 1,
+    "human": 2,
+    "unclassified": 0,
+  },
+  "source": "jsonl",
+  "topPages": [
+    {
+      "agentRequests": 10,
+      "agentSharePct": 76.9,
+      "humanRequests": 3,
+      "path": "/docs/intro",
+    },
+    {
+      "agentRequests": 8,
+      "agentSharePct": 72.7,
+      "humanRequests": 3,
+      "path": "/",
+    },
+    {
+      "agentRequests": 7,
+      "agentSharePct": 70,
+      "humanRequests": 3,
+      "path": "/docs/guide",
+    },
+    {
+      "agentRequests": 3,
+      "agentSharePct": 42.9,
+      "humanRequests": 4,
+      "path": "/docs/interactive",
+    },
+  ],
+  "totalRequests": 140,
+  "trafficSplit": [
+    {
+      "class": "human",
+      "pct": 31.4,
+      "requests": 44,
+      "sessions": 2,
+    },
+    {
+      "class": "agent",
+      "pct": 42.9,
+      "requests": 60,
+      "sessions": 2,
+    },
+    {
+      "class": "crawler",
+      "pct": 25.7,
+      "requests": 36,
+      "sessions": 1,
+    },
+    {
+      "class": "unclassified",
+      "pct": 0,
+      "requests": 0,
+      "sessions": 0,
+    },
+  ],
+}
+`;

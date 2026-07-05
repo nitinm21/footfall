@@ -2,16 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { agentInstructions, DEFAULT_INGEST_URL } from "../../../lib/agent-instructions";
 
 /**
- * The GA-snippet-equivalent first mile: show one personalized install command with a copy button,
- * then poll for the first event and flip green + reveal the dashboard when it arrives.
+ * The GA-snippet-equivalent first mile. Two ways to install — run it yourself, or hand a
+ * token-filled task to your AI coding agent — then poll for the first event and flip green.
+ * Scope is Next.js / Vercel only (v1); stated up front.
  */
 export function OnboardCard({ token }: { token: string }) {
   const router = useRouter();
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"" | "cmd" | "agent">("");
   const [detected, setDetected] = useState(false);
   const command = `npx footfall init ${token}`;
+  const agentTask = agentInstructions(token);
 
   useEffect(() => {
     let active = true;
@@ -38,13 +41,13 @@ export function OnboardCard({ token }: { token: string }) {
     };
   }, [token, router]);
 
-  const copy = async () => {
+  const copy = async (what: "cmd" | "agent", text: string) => {
     try {
-      await navigator.clipboard.writeText(command);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      await navigator.clipboard.writeText(text);
+      setCopied(what);
+      setTimeout(() => setCopied(""), 1500);
     } catch {
-      /* clipboard may be blocked; the command is still visible to copy manually */
+      /* clipboard may be blocked; text is still selectable */
     }
   };
 
@@ -52,13 +55,19 @@ export function OnboardCard({ token }: { token: string }) {
     <section className="mod" data-testid="onboard-card">
       <div className="modhead">
         <h2>Install Footfall on {token}</h2>
+        <span className="chip" style={{ background: "var(--accent-soft)", color: "#2b3568" }}>
+          Next.js / Vercel only (v1)
+        </span>
       </div>
       <p style={{ color: "var(--muted)", marginTop: 0 }}>
-        Run this in your Next.js project. It wraps your middleware (observe-only, fails open), wires
-        the 5xx beacon, and writes your token — reviewable as one{" "}
-        <span className="mono">git diff</span>.
+        Observe-only and fails open — never blocks or delays a response, no cookies, no bodies. Not
+        on Next.js/Vercel? Send a log export for a static report instead (see{" "}
+        <a href="/docs">docs</a>).
       </p>
-      <div style={{ display: "flex", gap: 8, alignItems: "stretch", marginTop: 6 }}>
+
+      {/* Option 1 — run it yourself */}
+      <div style={{ fontSize: 13, fontWeight: 700, margin: "10px 0 6px" }}>Run it yourself</div>
+      <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
         <code
           className="mono"
           style={{
@@ -73,13 +82,49 @@ export function OnboardCard({ token }: { token: string }) {
         >
           {command}
         </code>
-        <button type="button" className="markbtn" onClick={copy} style={{ padding: "0 14px" }}>
-          {copied ? "copied ✓" : "copy"}
+        <button
+          type="button"
+          className="markbtn"
+          onClick={() => copy("cmd", command)}
+          style={{ padding: "0 14px" }}
+        >
+          {copied === "cmd" ? "copied ✓" : "copy"}
         </button>
       </div>
-      <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 10 }}>
-        Then set <span className="mono">FOOTFALL_TOKEN={token}</span> on your host and deploy.
+      <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 8 }}>
+        Then set <span className="mono">FOOTFALL_TOKEN={token}</span> and{" "}
+        <span className="mono">FOOTFALL_INGEST_URL={DEFAULT_INGEST_URL}</span> on Vercel, deploy,
+        and run <span className="mono">npx footfall check {token}</span>.
       </p>
+
+      {/* Option 2 — hand it to your agent */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "18px 0 6px" }}>
+        <span style={{ fontSize: 13, fontWeight: 700 }}>🤖 Or hand it to your AI agent</span>
+        <button type="button" className="markbtn" onClick={() => copy("agent", agentTask)}>
+          {copied === "agent" ? "copied ✓" : "copy instructions"}
+        </button>
+      </div>
+      <p style={{ fontSize: 13, color: "var(--muted)", margin: "0 0 6px" }}>
+        Paste this into Claude Code / Cursor. The token is already filled in; it installs and
+        verifies autonomously (and asks you before deploying).
+      </p>
+      <pre
+        className="mono"
+        style={{
+          background: "var(--ink)",
+          color: "#d6dae2",
+          borderRadius: 8,
+          padding: "14px 16px",
+          fontSize: 12,
+          lineHeight: 1.6,
+          overflowX: "auto",
+          maxHeight: 260,
+          overflowY: "auto",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {agentTask}
+      </pre>
 
       <div
         className="callout"

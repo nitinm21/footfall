@@ -1,6 +1,8 @@
 // Public install + privacy page — the recruit-facing one-pager (mirrors docs/privacy.md).
 // Public by design: the middleware's `authorized` callback only gates "/" and "/sites/*".
 
+import { agentInstructions } from "../../lib/agent-instructions";
+
 export const metadata = { title: "Install & Privacy · Footfall" };
 
 const COLLECTS = [
@@ -30,6 +32,12 @@ export default function DocsPage() {
         <span className="sub">Install &amp; privacy</span>
       </div>
 
+      <div className="callout" style={{ marginBottom: 20 }}>
+        <b>Scope (v1):</b> the snippet install supports <b>Next.js apps deployed on Vercel</b>. On a
+        different stack? Send a Vercel log-drain export or JSONL and get the same analysis as a
+        static report — no install required.
+      </div>
+
       <section className="mod">
         <div className="modhead">
           <h2>Install in one command</h2>
@@ -54,6 +62,33 @@ npx footfall check <your-token>  # confirms the event round-trip end-to-end`}
           response. Capture runs after the response is sent, with a hard 500&nbsp;ms timeout and all
           failures swallowed — if Footfall is down, your site is unaffected.
         </p>
+      </section>
+
+      <section className="mod">
+        <div className="modhead">
+          <h2>🤖 Install with your AI agent</h2>
+        </div>
+        <p style={{ color: "var(--muted)", marginTop: 0, fontSize: 13.5 }}>
+          Add your site in the dashboard to get a token, then paste the block below into Claude Code
+          / Cursor (your token is pre-filled on that screen). The agent owns the repo half
+          autonomously; it sets Vercel env + deploys with your OK, and always leaves the change as a
+          reviewable <span className="mono">git diff</span>.
+        </p>
+        <pre
+          className="code"
+          style={{
+            background: "var(--ink)",
+            color: "#d6dae2",
+            borderRadius: 8,
+            padding: "14px 16px",
+            overflowX: "auto",
+            fontSize: 12,
+            lineHeight: 1.6,
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {agentInstructions("<your-token>")}
+        </pre>
       </section>
 
       <div className="split2">

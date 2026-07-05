@@ -88,10 +88,19 @@ test.describe("dashboard", () => {
     await page.getByRole("button", { name: /create site/i }).click();
 
     await expect(page).toHaveURL(/\/sites\/e2e-onboard\.dev/);
-    await expect(page.getByTestId("onboard-card")).toBeVisible();
-    await expect(page.getByTestId("onboard-card")).toContainText(
-      "npx footfall init e2e-onboard.dev",
-    );
+    const card = page.getByTestId("onboard-card");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("npx footfall init e2e-onboard.dev");
+    // scope stated + agent task block with the token baked in
+    await expect(card).toContainText(/Next\.js \/ Vercel only/i);
+    await expect(card).toContainText(/hand it to your AI agent/i);
+    await expect(card).toContainText('vercel env add FOOTFALL_TOKEN');
     await expect(page.getByTestId("listening")).toContainText(/listening for your first event/i);
+  });
+
+  test("llms.txt is public and points at the install", async ({ page }) => {
+    const res = await page.request.get("/llms.txt");
+    expect(res.status()).toBe(200);
+    expect(await res.text()).toContain("npx footfall init");
   });
 });

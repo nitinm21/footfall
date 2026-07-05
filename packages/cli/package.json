@@ -1,6 +1,6 @@
 {
   "name": "footfall",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Agent-experience analytics — install, verify, and report on the AI agents in your site's traffic.",
   "license": "MIT",
   "type": "module",

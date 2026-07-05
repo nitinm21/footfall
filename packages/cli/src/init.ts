@@ -149,13 +149,14 @@ export async function runInit(opts: InitOptions): Promise<number> {
     (opts.runInstall ?? defaultRunInstall)(cmd, opts.cwd);
   }
 
-  // 8) Next steps (the one thing we can't do for them).
-  log(`\n✓ Installed. Two things left:`);
+  // 8) Next steps (the one thing we can't do for them). BOTH env vars must be set on the host —
+  // without FOOTFALL_INGEST_URL the deployed middleware is inert and captures nothing.
   log(
-    `  1. Set FOOTFALL_TOKEN=${opts.token} in your host env (e.g. \`vercel env add FOOTFALL_TOKEN\`).`,
+    `\n✓ Installed. Set BOTH of these on your host (e.g. Vercel → Environment Variables), then deploy:`,
   );
-  log(`  2. Deploy, then run \`npx footfall check ${opts.token}\` to confirm the round-trip.`);
-  if (manualCount > 0)
-    log(`  (${manualCount} manual step(s) above — apply them before deploying.)`);
+  log(`    FOOTFALL_TOKEN=${opts.token}`);
+  log(`    FOOTFALL_INGEST_URL=${opts.ingestUrl}`);
+  log(`Then confirm the round-trip: npx footfall check ${opts.token}`);
+  if (manualCount > 0) log(`(${manualCount} manual step(s) above — apply them before deploying.)`);
   return 0;
 }

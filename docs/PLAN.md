@@ -451,6 +451,30 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 - [ ] Digest renders correctly from seed data (HTML snapshot test); send test via Resend sandbox
 - [ ] All previous suites still green; CI green
 
+**Phase-6 deviations (flagged, approved in-session):**
+- **No 404 beacon.** `init` wires only the 5xx beacon (`instrumentation.ts` `onRequestError`); the
+  `not-found.tsx` 404 beacon was already removed in Phase 4 (Next renders the not-found boundary on
+  every request in a segment, so a beacon there marks 200s as 404 — see `@footfall/next` beacon.ts).
+  404 status is resolved by the outside-in probe + drain. `footfall check` therefore confirms the
+  **request-event round-trip**, not a "404-beacon chain."
+- **CLI test scope.** Text-level golden diffs of the codemod + temp-dir `init` integration
+  (idempotency, `--dry-run` writes nothing, unparseable middleware degrades untouched, bad-token
+  aborts, pages-router flagged, src/ layout) — 24 tests — instead of building 7 real Next apps in CI
+  (too heavy). The wired-app runtime is already covered by `apps/target` + the middleware invariant
+  tests, and `footfall check` was proven end-to-end against the live portfolio (round-trip in 3.8s).
+- **Matcher not auto-broadened.** An existing narrow `matcher` is kept and the coverage limitation
+  is printed in the transcript (safer than silently changing when the user's middleware runs).
+  Broaden-with-internal-enforcement is deferred. `--vendor` flag also deferred; `--dry-run/--yes/--cwd/--api` shipped.
+- **Weekly digest (Resend): skipped for v1** (Nitin's call) — not on the hiring-artifact critical
+  path. Recorded as deferred; the alert rule ships with it later.
+- **npm publish deferred to Phase 8** (where the plan already scopes it). The environment isn't
+  npm-authenticated, and correct monorepo→npm publishing needs a build/bundle pipeline (tsup to
+  inline `workspace:*` deps + emit JS/types + tarball verification) — Phase 8 work. The CLI is
+  proven working via the repo (`pnpm footfall …`) and `footfall check` against the live portfolio.
+- **Real onboarding** verified via `footfall check nitinmurali.vercel.app` against the
+  already-instrumented portfolio (instead of domino, per Nitin). Friend's-site + broader recruiting
+  remain Nitin's parallel track.
+
 ### Manual Verification (Nitin)
 - [ ] The friend's-site onboarding actually happened start-to-finish without your intervention — get their honest friction notes
 - [ ] Read the privacy/docs page as a skeptical site owner

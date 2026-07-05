@@ -13,6 +13,7 @@
     "dist"
   ],
   "publishConfig": {
+    "access": "public",
     "main": "./dist/footfall.js",
     "bin": {
       "footfall": "./dist/footfall.js"

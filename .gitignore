@@ -22,6 +22,7 @@ test-results/
 .env
 .env.local
 .env*.local
+.npmrc
 
 # os
 .DS_Store

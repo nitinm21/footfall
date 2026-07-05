@@ -522,6 +522,13 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 **Goal:** publish **"The State of Agent Traffic on N Real Sites"** + a public read-only demo dashboard. This is the hiring artifact, the proof of the thesis, and the product launch in one.
 **Estimated effort:** 1–2 weekends.
 
+**Status (pulled forward):** Task 3's **npm publish is DONE** — `footfall@0.1.0` (CLI) and
+`@footfall/next@0.1.0` (middleware) are live on npm (tsup-bundled, zero-dep CLI, 17 KB edge
+middleware, verified via a clean-project `npx footfall init` against prod). LICENSE (MIT) + README
+quickstart shipped. Publishing was brought forward from its Phase-8 slot so `npx footfall` works
+for recruits now. **Tasks 1 (the post) + 2 (public demo) remain blocked on Phase 7's real dataset**
+(≥5 sites × ≥2 weeks) — not yet built, since they'd be fabrication without the data.
+
 ### Tasks
 1. **The post**: findings across all instrumented sites — agent share, family mix, the failure numbers ("X% of agent sessions hit a dead end"; "the most-requested file that doesn't exist is /llms.txt"), one fix-impact story with before/after. A **methodology section** that publishes classifier accuracy, the unclassified rate, and every caveat (sample skew, request-share ≠ user-share). Every chart regenerated from the repo's own pipeline (`scripts/post-charts.ts`) so the numbers are reproducible.
 2. **Public demo dashboard**: read-only route for one consenting site (or Nitin's own), no login. Rate-limited.

@@ -15,6 +15,7 @@ import {
 import type { DashboardData } from "../../../src/dashboard-data";
 import { markFixDeployed } from "./actions";
 import { LiveDot } from "./live-dot";
+import { OnboardCard } from "./onboard-card";
 
 // ── small helpers ─────────────────────────────────────────────────────────────
 
@@ -231,16 +232,21 @@ export function Dashboard({
       </div>
 
       {data.isEmpty ? (
-        <section className="mod" data-testid="empty-state">
-          <div className="modhead">
-            <h2>No traffic in this window yet</h2>
-          </div>
-          <p style={{ color: "var(--muted)", marginTop: 0 }}>
-            Once the snippet starts sending events for <span className="mono">{token}</span>, agent
-            sessions, failures, and fix impact will appear here. Nothing to classify yet — and we
-            never invent numbers.
-          </p>
-        </section>
+        data.site.source === "live" ? (
+          // A live site with no events yet → the onboarding first-mile (install + listening).
+          <OnboardCard token={token} />
+        ) : (
+          <section className="mod" data-testid="empty-state">
+            <div className="modhead">
+              <h2>No traffic in this window yet</h2>
+            </div>
+            <p style={{ color: "var(--muted)", marginTop: 0 }}>
+              Once the snippet starts sending events for <span className="mono">{token}</span>,
+              agent sessions, failures, and fix impact will appear here. Nothing to classify yet —
+              and we never invent numbers.
+            </p>
+          </section>
+        )
       ) : (
         <>
           <div className="kpis">
@@ -270,6 +276,13 @@ export function Dashboard({
               testid="kpi-failed"
             />
           </div>
+
+          {data.sampledDropped > 0 ? (
+            <div className="callout" data-testid="sampling-notice">
+              ⚠ {fmt(data.sampledDropped)} event(s) were sampled away this period after hitting the
+              daily ingest cap — counts below are a lower bound. Raise the cap or reduce volume.
+            </div>
+          ) : null}
 
           <section className="mod" data-testid="mod-traffic">
             <div className="modhead">

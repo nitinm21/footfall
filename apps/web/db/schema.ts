@@ -74,7 +74,26 @@ export const sites = pgTable("sites", {
   /** For fixture sites: which fixture to load (path relative to repo root). */
   fixture: text("fixture"),
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+  /** First event received — the onboarding funnel metric (token-issued → first-event elapsed). */
+  firstEventAt: timestamp("first_event_at", { mode: "date", withTimezone: true }),
 });
+
+/**
+ * Per-site daily ingest usage — the ingest-side cap's counter. Enforced at /api/ingest (not just
+ * in the middleware) so a hostile or buggy sender can't blow the Tinybird quota; `dropped` drives
+ * the dashboard's sampling notice. Keyed by token so ingest never needs a site lookup.
+ */
+export const siteUsage = pgTable(
+  "site_usage",
+  {
+    token: text("token").notNull(),
+    /** UTC day, YYYY-MM-DD. */
+    day: text("day").notNull(),
+    received: integer("received").notNull().default(0),
+    dropped: integer("dropped").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.token, t.day] })],
+);
 
 /** Per-site membership — the access-control table. A user sees a site iff a row exists. */
 export const siteMembers = pgTable(

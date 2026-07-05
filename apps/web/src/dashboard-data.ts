@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { type Fix, fixes as fixesTable, type Site } from "../db/schema";
 import { getSiteEvents } from "./events-source";
+import { droppedSince } from "./usage";
 
 const DAY = 86_400_000;
 export const WINDOW_DAYS = 14;
@@ -53,6 +54,8 @@ export interface DashboardData {
   fixImpact: FixImpact | null;
   lastEventTs: number | null;
   isEmpty: boolean;
+  /** Events sampled away by the ingest cap in this window (drives the sampling notice). */
+  sampledDropped: number;
 }
 
 function kpisOf(r: AnalysisResult): Kpis {
@@ -183,5 +186,9 @@ export async function buildDashboard(site: Site, now: number): Promise<Dashboard
     fixImpact: computeFixImpact(all, fixes),
     lastEventTs: all.length ? Math.max(...all.map((e) => e.ts)) : null,
     isEmpty: result.meta.totalRequests === 0,
+    sampledDropped:
+      site.source === "live"
+        ? await droppedSince(site.token, new Date(from).toISOString().slice(0, 10))
+        : 0,
   };
 }

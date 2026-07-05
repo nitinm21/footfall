@@ -39,10 +39,18 @@ export default async function Home() {
       <section className="mod">
         <div className="modhead">
           <h2>Your sites</h2>
+          <a
+            className="markbtn"
+            href="/sites/new"
+            style={{ marginLeft: "auto", padding: "5px 12px" }}
+          >
+            + Add site
+          </a>
         </div>
         {sites.length === 0 ? (
           <p style={{ color: "var(--muted)", marginTop: 0 }} data-testid="no-sites">
-            No sites yet. Install the snippet on a site to start seeing agent traffic.
+            No sites yet. <a href="/sites/new">Add a site</a> to get a one-line install command and
+            start seeing agent traffic.
           </p>
         ) : (
           <div className="sitegrid">

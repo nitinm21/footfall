@@ -12,27 +12,50 @@ export interface IngestResult {
 
 export const MAX_EVENTS = 1000;
 
+export interface HandleIngestOptions {
+  /** Max events+corrections per request (413 above it). */
+  maxEvents?: number;
+  /**
+   * Per-site daily cap check: given the site and this batch's event count, returns how many to
+   * accept vs drop. Injected by the route (Postgres counter); omitted in tests that don't cap.
+   */
+  recordUsage?: (site: string, eventCount: number) => Promise<{ accept: number; drop: number }>;
+}
+
 /**
- * Validate + authorize + persist a batch. In v1 the write token *is* the site token,
- * so we require the Authorization token to match `payload.site` (real token→site
- * mapping arrives with the metadata DB in Phase 5/6).
+ * Validate + authorize + (cap) + persist a batch. In v1 the write token *is* the site token,
+ * so the Authorization token must match `payload.site`. Above the per-site daily cap the batch's
+ * tail is sampled away and the dropped count is recorded — never a silent truncation.
  */
 export async function handleIngest(
   raw: unknown,
   authToken: string | null,
   sink: Sink,
-  maxEvents = MAX_EVENTS,
+  opts: HandleIngestOptions = {},
 ): Promise<IngestResult> {
+  const maxEvents = opts.maxEvents ?? MAX_EVENTS;
   if (!authToken) return { status: 401, body: "missing token" };
 
   const parsed = IngestPayloadSchema.safeParse(raw);
   if (!parsed.success) return { status: 400, body: "invalid payload" };
-  const payload = parsed.data;
+  let payload = parsed.data;
 
   if (payload.site !== authToken) return { status: 403, body: "token/site mismatch" };
 
   const count = (payload.events?.length ?? 0) + (payload.corrections?.length ?? 0);
   if (count > maxEvents) return { status: 413, body: "batch too large" };
+
+  const events = payload.events ?? [];
+  if (opts.recordUsage && events.length > 0) {
+    const { accept, drop } = await opts.recordUsage(payload.site, events.length);
+    if (drop > 0) {
+      payload = {
+        ...payload,
+        events: events.slice(0, accept),
+        dropped: (payload.dropped ?? 0) + drop,
+      };
+    }
+  }
 
   try {
     await sink(payload);

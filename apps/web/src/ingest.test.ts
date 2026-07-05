@@ -45,7 +45,29 @@ describe("handleIngest", () => {
   it("rejects an oversized batch with 413", async () => {
     const { sink } = memorySink();
     const events = Array.from({ length: 3 }, () => event());
-    expect((await handleIngest({ site: "site_a", events }, "site_a", sink, 2)).status).toBe(413);
+    const res = await handleIngest({ site: "site_a", events }, "site_a", sink, { maxEvents: 2 });
+    expect(res.status).toBe(413);
+  });
+
+  it("samples the batch tail above the daily cap and counts the drops", async () => {
+    const { sink, received } = memorySink();
+    const events = [event({ path: "/a" }), event({ path: "/b" }), event({ path: "/c" })];
+    const recordUsage = async (_site: string, n: number) => ({ accept: 1, drop: n - 1 });
+    const res = await handleIngest({ site: "site_a", events, dropped: 2 }, "site_a", sink, {
+      recordUsage,
+    });
+    expect(res.status).toBe(202);
+    expect(received[0]?.events).toHaveLength(1);
+    // middleware-dropped (2) + ingest-dropped (2) surfaced together, never silently truncated
+    expect(received[0]?.dropped).toBe(4);
+  });
+
+  it("does not trim when under the cap", async () => {
+    const { sink, received } = memorySink();
+    const events = [event(), event()];
+    const recordUsage = async (_site: string, n: number) => ({ accept: n, drop: 0 });
+    await handleIngest({ site: "site_a", events }, "site_a", sink, { recordUsage });
+    expect(received[0]?.events).toHaveLength(2);
   });
 
   it("accepts a valid batch (202) and hands it to the sink", async () => {

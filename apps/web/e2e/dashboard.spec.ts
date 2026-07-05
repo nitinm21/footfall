@@ -78,4 +78,20 @@ test.describe("dashboard", () => {
     const cross = await page.request.get("/api/sites/acme/last-event");
     expect(cross.status()).toBe(404);
   });
+
+  test("onboarding: add a site → personalized install command + listening card", async ({
+    page,
+  }) => {
+    await login(page, DEMO);
+    await page.goto("/sites/new");
+    await page.locator('input[name="token"]').fill("e2e-onboard.dev");
+    await page.getByRole("button", { name: /create site/i }).click();
+
+    await expect(page).toHaveURL(/\/sites\/e2e-onboard\.dev/);
+    await expect(page.getByTestId("onboard-card")).toBeVisible();
+    await expect(page.getByTestId("onboard-card")).toContainText(
+      "npx footfall init e2e-onboard.dev",
+    );
+    await expect(page.getByTestId("listening")).toContainText(/listening for your first event/i);
+  });
 });

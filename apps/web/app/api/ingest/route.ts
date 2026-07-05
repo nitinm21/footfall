@@ -1,4 +1,5 @@
 import { handleIngest, sinkFromEnv } from "../../../src/ingest";
+import { recordUsage } from "../../../src/usage";
 
 // Node runtime for local dev (file sink). On Vercel this also runs as a function;
 // switching to the edge runtime later only requires an fetch-based sink (Tinybird).
@@ -16,6 +17,6 @@ export async function POST(req: Request): Promise<Response> {
     raw = null;
   }
 
-  const result = await handleIngest(raw, token, sinkFromEnv());
+  const result = await handleIngest(raw, token, sinkFromEnv(), { recordUsage });
   return new Response(result.body, { status: result.status });
 }

@@ -18,7 +18,7 @@ function positional(argv: string[]): string | undefined {
   return argv.find((a) => !a.startsWith("--"));
 }
 
-const DEFAULT_API = process.env.FOOTFALL_API ?? "https://footfall.vercel.app";
+const DEFAULT_API = process.env.FOOTFALL_API ?? "https://footfall-phi.vercel.app";
 
 const USAGE = `footfall — agent-experience analytics
 

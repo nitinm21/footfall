@@ -94,7 +94,7 @@ test.describe("dashboard", () => {
     // scope stated + agent task block with the token baked in
     await expect(card).toContainText(/Next\.js \/ Vercel only/i);
     await expect(card).toContainText(/hand it to your AI agent/i);
-    await expect(card).toContainText('vercel env add FOOTFALL_TOKEN');
+    await expect(card).toContainText("vercel env add FOOTFALL_TOKEN");
     await expect(page.getByTestId("listening")).toContainText(/listening for your first event/i);
   });
 

@@ -67,3 +67,29 @@ jobs:
 
       - name: Report e2e
         run: pnpm --filter @footfall/report test:e2e
+
+  dashboard-e2e:
+    name: dashboard e2e (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm --filter @footfall/web exec playwright install --with-deps chromium
+
+      # Hermetic: the app runs on PGlite (embedded Postgres) seeded from the demo fixture, with the
+      # env-gated e2e Credentials provider. No external database, Tinybird, or GitHub OAuth needed.
+      - name: Dashboard e2e (login-gate, module render, numbers-parity, isolation)
+        run: pnpm --filter @footfall/web test:e2e

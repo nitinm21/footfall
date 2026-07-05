@@ -382,6 +382,34 @@ uploaded JSONL  ──┼─> normalize -> Event[] ─┬─> core pipeline (cla
 - [ ] Lighthouse (Chrome DevTools MCP or CI script) — no severe accessibility/perf failures on the dashboard
 - [ ] CI green
 
+**Phase-5 deviations (flagged, approved in-session):**
+- **Data path = "approach B" (Nitin's call).** The dashboard reads *raw* events from Tinybird (two
+  new pipes, `events_by_site` + `corrections_by_site`) and runs core's `analyze()` server-side,
+  instead of re-implementing sessionization/classification as class-based ClickHouse pipes. Report
+  ⇄ dashboard parity is then automatic — both surfaces call the same `core` functions — which is
+  *more* faithful to the "aggregations defined once in core" Locked Decision than mirroring them in
+  SQL. Fixture (demo) sites read a checked-in JSONL instead of Tinybird. The class-based SQL pipes
+  remain a future optimization if query volume ever demands precomputation.
+- **DB driver is dual: Neon (prod) / PGlite embedded (dev, test, CI).** Same Drizzle schema +
+  checked-in migrations for both. This makes the whole e2e suite hermetic — no external database,
+  Tinybird, or GitHub OAuth needed, and CI stays green with zero secrets. (`@electric-sql/pglite`
+  is a Next `serverExternalPackage`; bundling breaks its WASM/FS asset resolution.)
+- **e2e auth uses an env-gated Credentials provider** (`FOOTFALL_E2E=1`) so login is driveable
+  headlessly; production is GitHub-only. Sessions are JWT (the Drizzle adapter still persists
+  users/accounts) so the Edge middleware can gate routes without a DB call.
+- **Owner bootstrap bridge:** Phase 5 has no onboarding UI (that's Phase 6), so `FOOTFALL_OWNER_EMAIL`
+  auto-attaches the operator as `owner` of all `source='live'` sites on first sign-in — this is how
+  Nitin's two real sites reach his account for the manual check. Removed/replaced by Phase 6 onboarding.
+- **KPI window is 14 days** (current) vs the prior 14 days (deltas). The mock says "30d"; 14d fits
+  the ≥2-weeks-of-data goal and the demo span. Fixture sites anchor the window to the data's own
+  last timestamp (not wall-clock) so numbers-parity is deterministic.
+- **Seeded demo** is a deterministic generator (`scripts/gen-demo-fixture.ts` → committed
+  `fixtures/demo/dashboard-demo.jsonl`): a 28-day multi-family *sample* dataset with a baked
+  `/llms.txt` fix story (the mock is itself labelled fictional sample data).
+- **Lighthouse result:** Accessibility 100 · Best Practices 100 · SEO 100 on the seeded dashboard
+  (Chrome DevTools MCP, desktop). Two initial a11y misses (missing `<main>` landmark; small status
+  pills under 4.5:1) were fixed.
+
 ### Manual Verification (Nitin)
 - [ ] Log in, browse your own real data for your two sites — does it *feel* like the mock?
 - [ ] Receipts on real sessions still convincing

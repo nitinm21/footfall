@@ -1,0 +1,13 @@
+NODE result
+SQL >
+    %
+    -- Corrections carry no site column; they correlate to events by request_id (globally
+    -- unique), so a time-window filter is enough — foreign request_ids simply never match.
+    SELECT request_id, status, path, ts
+    FROM corrections
+    WHERE ts >= {{ Int64(since, 0) }}
+      AND ts < {{ Int64(until, 99999999999999) }}
+    ORDER BY ts ASC
+    LIMIT {{ Int32(row_limit, 200000) }}
+
+TYPE endpoint

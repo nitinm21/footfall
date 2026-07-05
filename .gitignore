@@ -13,6 +13,11 @@ playwright-report/
 test-results/
 .turbo/
 
+# embedded Postgres (PGlite) — dev/test only, never committed
+.footfall-pglite/
+*.pglite/
+**/.e2e-pglite/
+
 # env — never commit real secrets (.env.example is the committed template)
 .env
 .env.local

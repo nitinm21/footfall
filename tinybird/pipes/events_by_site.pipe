@@ -1,0 +1,14 @@
+NODE result
+SQL >
+    %
+    SELECT v, ts, site, method, path, has_query, status, resp_bytes, content_type,
+           duration_ms, ua, accept, sec_fetch_mode, referer_host, conditional, ip_hash, asset,
+           request_id, bot_verified
+    FROM events
+    WHERE site = {{ String(site, '') }}
+      AND ts >= {{ Int64(since, 0) }}
+      AND ts < {{ Int64(until, 99999999999999) }}
+    ORDER BY ts ASC
+    LIMIT {{ Int32(row_limit, 200000) }}
+
+TYPE endpoint

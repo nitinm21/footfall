@@ -22,7 +22,8 @@
     "probe": "tsx scripts/probe.ts",
     "loadtest": "tsx scripts/loadtest.ts",
     "parity": "tsx scripts/parity.ts",
-    "quality": "tsx scripts/quality.ts"
+    "quality": "tsx scripts/quality.ts",
+    "post-charts": "tsx scripts/post-charts.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

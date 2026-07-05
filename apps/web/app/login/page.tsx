@@ -45,6 +45,9 @@ export default async function LoginPage() {
             Continue with GitHub
           </button>
         </form>
+        <p style={{ color: "var(--muted)", fontSize: 13, marginBottom: 0 }}>
+          Just looking? <a href="/demo">See a live demo →</a>
+        </p>
       </section>
     </main>
   );

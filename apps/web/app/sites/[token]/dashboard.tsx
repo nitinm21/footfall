@@ -104,10 +104,13 @@ export function Dashboard({
   data,
   sites,
   userName,
+  readOnly = false,
 }: {
   data: DashboardData;
   sites: Site[];
   userName: string | null;
+  /** Public demo mode: no sign-out, no mark-fix, no cross-site nav. */
+  readOnly?: boolean;
 }) {
   const { result, kpis, prev } = data;
   const token = data.site.token;
@@ -199,27 +202,42 @@ export function Dashboard({
         <div className="brand">
           <span className="steps">👣</span> Footfall
         </div>
-        <span className="sub">{userName ? `signed in as ${userName}` : null}</span>
+        <span className="sub">
+          {readOnly ? "public demo · sample data" : userName ? `signed in as ${userName}` : null}
+        </span>
         <span className="right" style={{ marginLeft: "auto", display: "flex", gap: 14 }}>
-          {sites.length > 1 ? (
-            <a className="linkbtn" href="/">
-              all sites
-            </a>
-          ) : null}
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-          >
-            <button
-              type="submit"
-              className="linkbtn"
-              style={{ border: 0, background: "none", cursor: "pointer" }}
-            >
-              sign out
-            </button>
-          </form>
+          {readOnly ? (
+            <>
+              <a className="linkbtn" href="/docs">
+                docs
+              </a>
+              <a className="linkbtn" href="/login">
+                sign in
+              </a>
+            </>
+          ) : (
+            <>
+              {sites.length > 1 ? (
+                <a className="linkbtn" href="/">
+                  all sites
+                </a>
+              ) : null}
+              <form
+                action={async () => {
+                  "use server";
+                  await signOut({ redirectTo: "/login" });
+                }}
+              >
+                <button
+                  type="submit"
+                  className="linkbtn"
+                  style={{ border: 0, background: "none", cursor: "pointer" }}
+                >
+                  sign out
+                </button>
+              </form>
+            </>
+          )}
         </span>
       </div>
 
@@ -407,6 +425,8 @@ export function Dashboard({
                               <span className="pill ok">
                                 fix live{f.fixedAt ? ` · ${fmtDate(f.fixedAt)}` : ""}
                               </span>
+                            ) : readOnly ? (
+                              <span className="pill mut">open</span>
                             ) : (
                               <form action={markFixDeployed} style={{ display: "inline" }}>
                                 <input type="hidden" name="token" value={token} />

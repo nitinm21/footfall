@@ -103,4 +103,15 @@ test.describe("dashboard", () => {
     expect(res.status()).toBe(200);
     expect(await res.text()).toContain("npx footfall init");
   });
+
+  test("public /demo is read-only and needs no login", async ({ page }) => {
+    const res = await page.goto("/demo"); // no login()
+    expect(res?.status()).toBe(200);
+    await expect(page.getByText("public demo · sample data")).toBeVisible();
+    await expect(page.getByTestId("mod-traffic")).toBeVisible();
+    await expect(page.getByTestId("mod-fiximpact")).toContainText("/llms.txt");
+    // read-only: no sign-out, no mark-fix controls
+    await expect(page.getByRole("button", { name: /sign out/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /mark fix deployed/i })).toHaveCount(0);
+  });
 });

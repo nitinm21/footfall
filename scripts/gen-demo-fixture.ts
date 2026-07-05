@@ -356,6 +356,9 @@ const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "
 mkdirSync(outDir, { recursive: true });
 const out = join(outDir, "dashboard-demo.jsonl");
 writeFileSync(out, `${events.map((e) => JSON.stringify(e)).join("\n")}\n`);
+// Also emit a JSON array so the public /demo route can import it (bundled, works on Vercel with
+// no runtime file read) while the .jsonl stays the source for the CLI/seed fixture path.
+writeFileSync(join(outDir, "dashboard-demo.json"), JSON.stringify(events));
 console.log(
   `wrote ${events.length} events → fixtures/demo/dashboard-demo.jsonl (${DAYS} days, fix day ${FIX_DAY})`,
 );

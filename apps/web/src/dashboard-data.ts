@@ -6,7 +6,7 @@
 import { type AnalysisResult, analyze, type Event, type FieldMap } from "@footfall/core";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { type Fix, fixes as fixesTable, type Site } from "../db/schema";
+import { fixes as fixesTable, type Site } from "../db/schema";
 import { getSiteEvents } from "./events-source";
 import { droppedSince } from "./usage";
 
@@ -102,8 +102,11 @@ function trendOf(events: Event[], path: string, from: number, to: number): Failu
   return "flat";
 }
 
+/** A marked fix, as assembleDashboard needs it (DB row or a synthetic demo fix). */
+export type FixLike = { path: string; type: string; markedDeployedAt: Date };
+
 /** Build the fix-impact card for the marked fix with the largest before-window failure count. */
-function computeFixImpact(all: Event[], fixes: Fix[]): FixImpact | null {
+function computeFixImpact(all: Event[], fixes: FixLike[]): FixImpact | null {
   let best: FixImpact | null = null;
   for (const fix of fixes) {
     const deployedAt = fix.markedDeployedAt.getTime();
@@ -126,28 +129,21 @@ function computeFixImpact(all: Event[], fixes: Fix[]): FixImpact | null {
 }
 
 /**
- * Assemble the dashboard model. `now` is injected (not read from the clock) so tests are
- * deterministic; fixture sites anchor their window to the data's own last timestamp instead.
+ * Pure(ish) dashboard assembly from already-loaded events + fixes — no DB, no I/O. Shared by the
+ * authenticated dashboard (buildDashboard) and the public demo (buildDemoDashboard). `now` is
+ * injected for determinism; fixture sources anchor their window to the data's own last timestamp.
  */
-export async function buildDashboard(site: Site, now: number): Promise<DashboardData> {
+export function assembleDashboard(input: {
+  all: Event[];
+  fieldMap: FieldMap;
+  fixes: FixLike[];
+  now: number;
+  site: Pick<Site, "token" | "name" | "source">;
+  sampledDropped?: number;
+}): DashboardData {
+  const { all, fieldMap, fixes, now, site } = input;
   const isFixture = site.source === "fixture";
-
-  // Pull enough history to cover the current window AND the prior window (for deltas) plus the
-  // fix-impact before/after span.
-  let all: Event[];
-  let fieldMap: FieldMap;
-  let to: number;
-  if (isFixture) {
-    const s = await getSiteEvents(site, 0, Number.MAX_SAFE_INTEGER);
-    all = s.events;
-    fieldMap = s.fieldMap;
-    to = all.length ? Math.max(...all.map((e) => e.ts)) + 1 : now;
-  } else {
-    to = now;
-    const s = await getSiteEvents(site, to - 2 * WINDOW_DAYS * DAY, to);
-    all = s.events;
-    fieldMap = s.fieldMap;
-  }
+  const to = isFixture ? (all.length ? Math.max(...all.map((e) => e.ts)) + 1 : now) : now;
 
   const from = to - WINDOW_DAYS * DAY;
   const prevFrom = from - WINDOW_DAYS * DAY;
@@ -158,9 +154,7 @@ export async function buildDashboard(site: Site, now: number): Promise<Dashboard
   const result = analyze(cur, fieldMap, opts);
   const prev = prevEvents.length ? kpisOf(analyze(prevEvents, fieldMap, opts)) : null;
 
-  const fixes = await db.select().from(fixesTable).where(eq(fixesTable.siteId, site.id));
   const fixByPath = new Map(fixes.map((f) => [f.path, f]));
-
   const failureFeed: FailureRow[] = result.failures.map((f) => {
     const fix = fixByPath.get(f.path);
     return {
@@ -186,9 +180,29 @@ export async function buildDashboard(site: Site, now: number): Promise<Dashboard
     fixImpact: computeFixImpact(all, fixes),
     lastEventTs: all.length ? Math.max(...all.map((e) => e.ts)) : null,
     isEmpty: result.meta.totalRequests === 0,
-    sampledDropped:
-      site.source === "live"
-        ? await droppedSince(site.token, new Date(from).toISOString().slice(0, 10))
-        : 0,
+    sampledDropped: input.sampledDropped ?? 0,
   };
+}
+
+/**
+ * Load a site's events (fixture JSONL or Tinybird) + its marked fixes from the DB, then assemble.
+ * `now` is injected (not read from the clock) so tests are deterministic.
+ */
+export async function buildDashboard(site: Site, now: number): Promise<DashboardData> {
+  const isFixture = site.source === "fixture";
+  // Enough history to cover the current window, the prior window (deltas), and the fix-impact span.
+  const { events: all, fieldMap } = isFixture
+    ? await getSiteEvents(site, 0, Number.MAX_SAFE_INTEGER)
+    : await getSiteEvents(site, now - 2 * WINDOW_DAYS * DAY, now);
+
+  const fixes = await db.select().from(fixesTable).where(eq(fixesTable.siteId, site.id));
+  const from =
+    (isFixture ? (all.length ? Math.max(...all.map((e) => e.ts)) + 1 : now) : now) -
+    WINDOW_DAYS * DAY;
+  const sampledDropped =
+    site.source === "live"
+      ? await droppedSince(site.token, new Date(from).toISOString().slice(0, 10))
+      : 0;
+
+  return assembleDashboard({ all, fieldMap, fixes, now, site, sampledDropped });
 }

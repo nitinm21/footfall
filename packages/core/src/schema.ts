@@ -1,10 +1,9 @@
 import { z } from "zod";
+import { EVENT_VERSION } from "./version";
 
-/**
- * Event schema version. Bump only on a breaking change to the shape below;
- * every event carries this in its `v` field so mixed-version streams stay readable.
- */
-export const EVENT_VERSION = 1 as const;
+// Re-exported so existing `@footfall/core` / `@footfall/core/schema` importers are unaffected;
+// the canonical definition lives in ./version (zod-free) for lean consumers.
+export { EVENT_VERSION };
 
 /**
  * The single event contract.

@@ -19,6 +19,36 @@ traffic that can't be classified confidently stays in an `unclassified` bucket, 
 classification comes with the signals ("receipts") behind it. Classifier accuracy is
 measured against a labelled corpus and published in-product.
 
+## Quickstart
+
+Install on any Next.js/Vercel site in about a minute — observe-only, fails open, no cookies:
+
+```bash
+npx footfall init <your-domain>     # wraps your middleware + wires the 5xx beacon (one reviewable diff)
+```
+
+Then set these on your host and deploy:
+
+```
+FOOTFALL_TOKEN=<your-domain>
+FOOTFALL_INGEST_URL=https://footfall-phi.vercel.app/api/ingest
+```
+
+Confirm the round-trip end-to-end (it *becomes* the traffic):
+
+```bash
+npx footfall check <your-domain>
+```
+
+No install? Send a Vercel log-drain export or JSONL and get a static report instead:
+
+```bash
+npx footfall report --format vercel --in export.json --out report.html
+```
+
+See [`docs/privacy.md`](docs/privacy.md) for exactly what is and isn't collected, and
+[`docs/runbook.md`](docs/runbook.md) for install troubleshooting.
+
 ## Architecture
 
 TypeScript monorepo (pnpm workspaces, Node 22).

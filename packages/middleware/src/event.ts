@@ -1,6 +1,8 @@
-// Narrow subpath imports: keep node:crypto (in core's barrel) out of the edge bundle.
-import { EVENT_VERSION, type Event } from "@footfall/core/schema";
+// Narrow subpath imports: keep node:crypto (in core's barrel) AND zod (in core's schema) out of
+// the edge bundle — EVENT_VERSION comes from the zod-free ./version module; Event is type-only.
+import type { Event } from "@footfall/core/schema";
 import { botVerified } from "@footfall/core/verify";
+import { EVENT_VERSION } from "@footfall/core/version";
 import { hashIp } from "./hash";
 
 const ASSET_EXT = /\.(css|js|mjs|map|svg|png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|eot)$/i;

@@ -1,23 +1,46 @@
 {
-  "name": "@footfall/cli",
-  "version": "0.0.0",
-  "private": true,
-  "description": "npx footfall report / init / check (publishes as `footfall`).",
+  "name": "footfall",
+  "version": "0.1.0",
+  "description": "Agent-experience analytics — install, verify, and report on the AI agents in your site's traffic.",
+  "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "main": "./dist/footfall.js",
+    "bin": {
+      "footfall": "./dist/footfall.js"
+    }
+  },
+  "keywords": [
+    "ai-agents",
+    "analytics",
+    "nextjs",
+    "cli",
+    "observability",
+    "llm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nitinm21/footfall.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/nitinm21/footfall#readme",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@footfall/core": "workspace:*",
-    "@footfall/report": "workspace:*"
+    "test": "vitest run",
+    "build": "tsup",
+    "prepack": "tsup"
   },
   "devDependencies": {
+    "@footfall/core": "workspace:*",
+    "@footfall/report": "workspace:*",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

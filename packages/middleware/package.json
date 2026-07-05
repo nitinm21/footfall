@@ -1,8 +1,8 @@
 {
   "name": "@footfall/next",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
   "description": "Observe-only, fail-open Next.js middleware that mirrors request events to Footfall.",
+  "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -10,17 +10,47 @@
     ".": "./src/index.ts",
     "./beacon": "./src/beacon.ts"
   },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./beacon": {
+        "types": "./dist/beacon.d.ts",
+        "import": "./dist/beacon.js"
+      }
+    }
+  },
+  "keywords": [
+    "nextjs",
+    "middleware",
+    "analytics",
+    "ai-agents",
+    "observability"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nitinm21/footfall.git",
+    "directory": "packages/middleware"
+  },
+  "homepage": "https://github.com/nitinm21/footfall",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@footfall/core": "workspace:*"
+    "test": "vitest run",
+    "build": "tsup",
+    "prepack": "tsup"
   },
   "peerDependencies": {
     "next": ">=14"
   },
   "devDependencies": {
+    "@footfall/core": "workspace:*",
     "@types/node": "catalog:",
     "next": "catalog:",
     "typescript": "catalog:",

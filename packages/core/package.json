@@ -9,6 +9,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
+    "./version": "./src/version.ts",
     "./ingest": "./src/ingest.ts",
     "./verify": "./src/verify/index.ts"
   },
